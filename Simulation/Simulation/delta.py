@@ -2,7 +2,6 @@ from state import State
 from enum import Enum
 from datetime import date
 from numpy import random
-import requests
 
 
 # This class is response for manipulating the state
@@ -20,14 +19,10 @@ class Delta:
     # "The standard deviation of annual mean wind speed over the 20 year period is approximately 5 per cent of the mean"
     # source: https://www.wind-energy-the-facts.org/the-annual-variability-of-wind-speed.html
 
-    def __init__(self, state: State, simulate: bool):
+    def __init__(self, state: State):
         self.__state: State = state
-        self.__real_data: bool = simulate
         self.__daily_ws_mu: float = 0
-
-        today = date.strftime(date.today(), "%d-%m-%y")
-        today = today.split("-")
-        self.__day: int = int(today[0])
+        self.__last_update_day: int = -1
 
     # Updates the wind speed of the given state that is passed to delta upon construction.
     # The simulation is split up into two parts: simulating daily and hourly wind.
@@ -36,18 +31,10 @@ class Delta:
     # and drawn from a normal distribution. The hourly wind is based upon the daily wind and drawn
     # from a normal distribution
     def update_state(self):
-        if self.__real_data:
-            # TODO: call some wind speed api and get real data from Luleå!
-            # placeholder url
-            url = "http://history.openweathermap.org/data/2.5/history/city?q={city ID},{country code}&type=hour&start={start}&end={end}&appid={API key}"
-            params = {}
-            r = requests.get(url=url, params=params)
-            print(r.json())
-            pass
-        else:
             today = date.strftime(date.today(), "%d-%m-%y")
             today = today.split("-")
-            if int(today[0]) != self.__day:
+            if int(today[0]) != self.__last_update_day:
+                self.__last_update_day = today[0]
                 # Average Wind Speed (mph) montly (Jan to Dec) [8.2, 7.8, 7.5, 6.8, 6.4, 6.2, 6.3, 6.8, 7.6, 8.2, 8.3, 8.4]
                 # source: https://weatherspark.com/y/89129/Average-Weather-in-Lule%C3%A5-Sweden-Year-Round
                 avg_ws_month = [8.2, 7.8, 7.5, 6.8, 6.4, 6.2, 6.3, 6.8, 7.6, 8.2, 8.3, 8.4]
@@ -62,4 +49,4 @@ class Delta:
                 self.__daily_ws_mu = random.normal(mu, std_dev_day, None)
 
             std_dev_hour = self.__daily_ws_mu * 0.01
-            self.__state.wind_speed = random.normal(self.__daily_ws_mu, std_dev_hour, None)
+            self.__state.set_wind_speed(random.normal(self.__daily_ws_mu, std_dev_hour, None))

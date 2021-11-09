@@ -8,7 +8,7 @@ if __name__ == "__main__":
     s = today.strftime("%d-%m-%y")
 
     state = State()
-    delta = Delta(state, False)
+    delta = Delta(state)
 
     # driver for Delta. We update state until the application is terminated
     while True:
