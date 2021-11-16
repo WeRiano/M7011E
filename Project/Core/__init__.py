@@ -1,5 +1,5 @@
-from state import State
-from delta import Delta
+from Simulator.state import State
+from Simulator.delta import Delta
 from datetime import date
 import time
 
@@ -14,3 +14,4 @@ if __name__ == "__main__":
     while True:
         delta.update_state()
         time.sleep(3600)
+        
