@@ -3,10 +3,13 @@
 import os
 import sys
 
+from threading import Thread
+from Simulation.delta import sim_real_time_driver
+
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Core.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Simulation.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -19,4 +22,6 @@ def main():
 
 
 if __name__ == '__main__':
+    sim_thread = Thread(target=sim_real_time_driver)
+    sim_thread.start()
     main()
