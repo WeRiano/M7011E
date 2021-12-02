@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'API',
 
     'rest_framework',
-    'drf_yasg',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +128,16 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Wind Turbine Simulation',
+    'DESCRIPTION': 'API that allows a user to fetch the different simulated conditions and information',
+    'VERSION': '1.0.0',
+    'CONTACT': "williamfors13@gmail.com"
+}
