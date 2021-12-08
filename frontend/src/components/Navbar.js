@@ -1,22 +1,38 @@
 import React from "react";
 import { Navbar, Container, Nav } from "react-bootstrap";
+import { useNavigate } from 'react-router-dom'
 
-class NavigationBar extends React.Component {
-  render() {
-    return (
-      <Navbar bg="dark" variant="dark">
-        <Container>
-          <Navbar.Brand> Surefire Electric </Navbar.Brand>
-          <Navbar.Collapse className="justify-content-end">
+import { useAuth } from '../contexts/AuthContext'
+
+export default function NavigationBar() {
+  const { currentUser, logout } = useAuth()
+  console.log(currentUser)
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout()
+    navigate('/')
+  }
+
+  return (
+    <Navbar bg="dark" variant="dark">
+      <Container>
+        <Navbar.Brand> SureFire Electrics </Navbar.Brand>
+        <Navbar.Collapse className="justify-content-end">
+            {currentUser != null ?
+            <Nav>
+              <Nav.Link href="/profile">Profile</Nav.Link>
+              <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+              <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+            </Nav>
+            :
             <Nav>
               <Nav.Link href="/login">Login</Nav.Link>
               <Nav.Link href="/signup">Signup</Nav.Link>
             </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-    );
-  }
+            }
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+  );
 }
-
-export default NavigationBar

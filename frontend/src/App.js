@@ -6,33 +6,32 @@ import NavigationBar from './components/Navbar'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import Dashboard from "./components/Dashboard";
+import Profile from "./components/Profile"
 
-class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      loggedIn: true
-    }
-  }
+import { AuthProvider } from './contexts/AuthContext'
 
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <NavigationBar />
-        </header>
-        <Routes>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          {this.state.loggedIn ?
-              <Route path="/" element={<Navigate replace to="/dashboard" />} />
-            : <Route path="/" element={<Navigate replace to="/login" />} />
-          }
-        </Routes>
-      </div>
-    );
-  }
+function App() {
+  var loggedIn = false;
+
+  return (
+    <div className="App">
+      <AuthProvider>
+      <header className="App-header">
+        <NavigationBar />
+      </header>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={<Profile />} />
+        {loggedIn ?
+            <Route path="/" element={<Navigate replace to="/dashboard" />} />
+          : <Route path="/" element={<Navigate replace to="/login" />} />
+        }
+      </Routes>
+      </AuthProvider>
+    </div>
+  );
 }
 
 export default App

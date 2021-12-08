@@ -9,6 +9,8 @@ class State:
     __e_prod_power: float       # [kWh] - function of the wind. How much energy the wind-turbine can produce for 1 hour.
     __e_market_price: float     # [kr/kWh]
 
+    __buffer: float             # [kWh] - [0, 13.5]
+
     def __init__(self):
         if State.instance is None:
             State.instance = self
@@ -75,6 +77,8 @@ class State:
 
     def get_temp(self) -> float:
         return self.__temp
+
+
 
     def get_prod_power(self) -> float:
         return self.__e_prod_power

@@ -1,87 +1,73 @@
-import React from "react";
-import {Button, Card, Col, Container, Form, Row} from "react-bootstrap";
+import React, { useRef, useState } from "react";
+import {Button, Card, Col, Container, Form, Row, Alert } from "react-bootstrap";
+import { Link } from 'react-router-dom'
 
-class Signup extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-      password: '',
-      confirmPassword: ''
+import { useAuth } from "../contexts/AuthContext";
+
+export default function Signup() {
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const passwordConfirmRef = useRef();
+  const { signup } = useAuth()
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+
+    if (passwordRef.current.value === passwordConfirmRef.current.value) {
+      return setError('Passwords do not match')
     }
 
+    setLoading(true)
+    signup(emailRef.current.value, passwordRef.current.value)
+    setLoading(false)
   }
 
-  handleEmailChange = (e) => {
-    this.setState({email: e.target.value})
-  }
-
-  handlePasswordChange = (e) => {
-    this.setState({password: e.target.value})
-  }
-
-  handleConfirmPasswordChange = (e) => {
-    this.setState({confirmPassword: e.target.value})
-  }
-
-  render() {
-    return (
-      <Container>
-        <Row className="justify-content-center align-items-start">
-          <Col xs lg="3" sm="5">
-            <Card className="text-center"
-                  style={{ marginTop: 100}}>
-              <Card.Header> Signup </Card.Header>
-              <Card.Body>
-                <div className="gap-2">
-                  <Form>
-                    <Form.Group controlId="formEmail">
-                      <Form.Label> Email Address </Form.Label>
-                      <Form.Control type="email" placeholder="example@email.com"
-                                    value={this.state.email}
-                                    onChange={this.handleEmailChange}/>
-                    </Form.Group>
-                    <Form.Group controlId="formPassword"
-                                style={{ marginTop: 15 }}>
-                      <Form.Label> Password </Form.Label>
-                      <Form.Control type="password"
-                                    value={this.state.password}
-                                    onChange={this.handlePasswordChange}/>
-                    </Form.Group>
-                    <Form.Group controlId="formConfirmPassword"
-                                style={{ marginTop: 15 }}>
-                      <Form.Label> Confirm Password </Form.Label>
-                      <Form.Control type="password"
-                                    value={this.state.confirmPassword}
-                                    onChange={this.handleConfirmPasswordChange}/>
-                    </Form.Group>
-                  </Form>
-                  <div className="d-grid gap-2">
-                  <Button variant="success" size="lg" style={{ marginTop: 15 }}
-                          onClick={this.handleSignup}>
-                    Create account
-                  </Button>
-                  <Button variant="primary" size="lg" style={{ marginTop: 15 }}
-                          href="/login">
-                    Login
-                  </Button>
-                  </div>
+  return (
+    <Container>
+      <Row className="justify-content-center align-items-start">
+        <Col xs lg="3" md="5" sm="7">
+          <Card className="text-center"
+                style={{ marginTop: 100}}>
+            <Card.Header as="h5"> Sign Up </Card.Header>
+            <Card.Body>
+              { error && <Alert variant="danger">{error}</Alert> }
+              <div className="gap-2">
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group controlId="formEmail">
+                    <Form.Label> Email Address </Form.Label>
+                    <Form.Control type="email" placeholder="example@email.com"
+                                  ref={emailRef} />
+                  </Form.Group>
+                  <Form.Group controlId="formPassword"
+                              style={{ marginTop: 15 }}>
+                    <Form.Label> Password </Form.Label>
+                    <Form.Control type="password"
+                                  ref={passwordRef} />
+                  </Form.Group>
+                  <Form.Group controlId="formConfirmPassword"
+                              style={{ marginTop: 15 }}>
+                    <Form.Label> Confirm Password </Form.Label>
+                    <Form.Control type="password"
+                                  ref={passwordConfirmRef} />
+                  </Form.Group>
+                </Form>
+                <div className="d-grid gap-2">
+                <Button variant="success" size="lg" style={{ marginTop: 15 }}
+                        disabled={loading} >
+                  Create account
+                </Button>
+                <div className="w-100 text-center mt-2">
+                  Already have an account? <Link to="/login">Log In</Link>
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  handleSignup = () => {
-    // TODO: Use backend api!
-    console.log("Clicked signup button!")
-    console.log(this.state.email)
-    console.log(this.state.password)
-    console.log(this.state.confirmPassword)
-  }
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+  );
 }
-
-export default Signup
