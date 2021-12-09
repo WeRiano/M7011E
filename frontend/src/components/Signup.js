@@ -8,9 +8,11 @@ export default function Signup() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const { signup } = useAuth()
+  const { signup, logout } = useAuth()
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  logout()
 
   function handleSubmit(e) {
     e.preventDefault();

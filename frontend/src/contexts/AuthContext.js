@@ -7,17 +7,11 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null)
+  const storedUser = JSON.parse(localStorage.getItem('currentUser'))
+  const [currentUser, setCurrentUser] = useState(storedUser)
 
   useEffect(() => {
-    const user = localStorage.getItem('user')
-    if (user) {
-      setCurrentUser(JSON.parse(user))
-    }
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('user', JSON.stringify(currentUser))
+    localStorage.setItem('currentUser', JSON.stringify(currentUser))
   })
 
   function signup(email, password) {
@@ -40,6 +34,7 @@ export function AuthProvider({ children }) {
 
   function logout() {
     setCurrentUser(null)
+    localStorage.setItem('currentUser', JSON.stringify(currentUser))
   }
 
   const value = {
