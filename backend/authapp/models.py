@@ -92,7 +92,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=40)
     zip_code = models.IntegerField(validators=[MinValueValidator(10000, "ZIP code does not exist"),
                                                MaxValueValidator(99000, "ZIP code does not exist")])
-    houseImg = models.ImageField(verbose_name="house image")
+    houseImg = models.ImageField(verbose_name="house image", upload_to='')
 
     objects = UserManager()
 

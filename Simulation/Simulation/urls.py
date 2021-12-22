@@ -1,4 +1,4 @@
-"""backend_api URL Configuration
+"""Simulation URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.2/topics/http/urls/
@@ -14,7 +14,6 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-<<<<<<< HEAD:Simulation/Simulation/urls.py
 from django.urls import path, include
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -25,12 +24,4 @@ urlpatterns = [
     path('api/version/1/', include('API.urls'), name="simulation API version 1.0")
     # TODO: I guess future versions would create another django app and then redirect to that!
     # Main simulation is in the sim app.
-=======
-from django.urls import path,include
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/',include('Api.urls', namespace='Site_api'))
-
-   # path('api/', include('project.urls')), #new line
->>>>>>> origin/backend:backend_api/Core/urls.py
 ]

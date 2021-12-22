@@ -1,5 +1,5 @@
 """
-WSGI config for backend_api project.
+WSGI config for Simulation project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,10 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-<<<<<<< HEAD:Simulation/Simulation/wsgi.py
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Simulation.settings')
-=======
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend_api.settings')
->>>>>>> origin/backend:backend_api/Core/wsgi.py
 
 application = get_wsgi_application()
