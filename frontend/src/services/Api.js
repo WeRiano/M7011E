@@ -49,6 +49,29 @@ function requestUserInfo(auth_token) {
     })
 }
 
+function requestEditUserPassword(newPassword, confirmNewPassword, currentPassword, auth_token) {
+    // TODO: Don't hardcode location for backend server
+    let url = "http://127.0.0.1:7999/auth/users/set_password/"
+
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + auth_token
+        },
+        body: JSON.stringify({
+            new_password: newPassword,
+            re_new_password: confirmNewPassword,
+            current_password: currentPassword
+        })
+    }).then(handleFetchError).then(() => {
+        return [true, null]
+    }).catch((error) => {
+        console.log(error)
+        return [false, null]
+    })
+}
+
 function requestEditUserInfo(user, auth_token) {
     // TODO: Don't hardcode location for backend server
     let url = "http://127.0.0.1:7999/auth/users/update_profile/"
@@ -75,4 +98,4 @@ function requestEditUserInfo(user, auth_token) {
     })
 }
 
-export { requestAuthToken, requestUserInfo, requestEditUserInfo};
+export { requestAuthToken, requestUserInfo, requestEditUserInfo, requestEditUserPassword };

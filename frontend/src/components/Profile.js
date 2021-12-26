@@ -5,7 +5,7 @@ import { Button, Card, Col, Container, Form, Row} from "react-bootstrap";
 
 import { useAuth } from '../contexts/AuthContext'
 import { loadToken } from '../services/Storage'
-import { requestUserInfo, requestEditUserInfo } from '../services/Api'
+import { requestUserInfo, requestEditUserInfo, requestEditUserPassword } from '../services/Api'
 import HouseImg from '../house_placeholder.jpg'
 
 export default function Profile() {
@@ -17,6 +17,10 @@ export default function Profile() {
   const addressRef = useRef()
   const cityRef = useRef()
   const zipCodeRef = useRef()
+
+  const newPassRef = useRef()
+  const newPassConfRef = useRef()
+  const curPassRef = useRef()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,7 +44,6 @@ export default function Profile() {
       city: (cityRef.current.value === '') ? initData.city : cityRef.current.value,
       zip_code: (zipCodeRef.current.value === '') ? initData.zip_code : zipCodeRef.current.value,
     }
-    console.log(user)
     let token = loadToken()
     let request = requestEditUserInfo(user, token)
     const [success, data] = await request
@@ -51,8 +54,18 @@ export default function Profile() {
     }
   }
 
-  function handleUpdatePassword() {
+  async function handleUpdatePassword(e) {
+    e.preventDefault()
 
+    let token = loadToken()
+    let request = requestEditUserPassword(newPassRef.current.value, newPassConfRef.current.value,
+                                          curPassRef.current.value, token)
+    const [success, data] = await request
+    if (success) {
+      console.log("Updated user password!")
+    } else {
+      console.error("Error when updating user password")
+    }
   }
 
   function handleUpdateImage() {
@@ -123,15 +136,19 @@ export default function Profile() {
               <Form>
                 <Row className="mb-3">
                   <Form.Group as={Col}>
+                    <Form.Label>Current password</Form.Label>
+                    <Form.Control type="password" ref={curPassRef} />
+                  </Form.Group>
+                  <Form.Group as={Col}>
                     <Form.Label>New password</Form.Label>
-                    <Form.Control type="password" />
+                    <Form.Control type="password" ref={newPassRef} />
                   </Form.Group>
                   <Form.Group as={Col}>
                     <Form.Label>Confirm new password</Form.Label>
-                    <Form.Control type="password" />
+                    <Form.Control type="password" ref={newPassConfRef} />
                   </Form.Group>
                 </Row>
-                <Button variant="primary" type="submit" onClick={handleUpdateAccountInfo}>
+                <Button variant="primary" type="submit" onClick={handleUpdatePassword}>
                   Save
                 </Button>
               </Form>
