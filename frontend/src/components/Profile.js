@@ -1,14 +1,54 @@
-import React from "react";
+"use no strict";
+
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Col, Container, Form, Row} from "react-bootstrap";
-import HouseImg from '../house_placeholder.jpg'
 
 import { useAuth } from '../contexts/AuthContext'
+import { loadToken } from '../services/Storage'
+import { requestUserInfo, requestEditUserInfo } from '../services/Api'
+import HouseImg from '../house_placeholder.jpg'
 
 export default function Profile() {
-  const { currentUser } = useAuth()
+  const [initData, setInitData] = useState({email: "", first_name: "", last_name: "",
+                                                     address: "", city: "", zip_code: ""})
+  const emailRef = useRef()
+  const firstNameRef = useRef()
+  const lastNameRef = useRef()
+  const addressRef = useRef()
+  const cityRef = useRef()
+  const zipCodeRef = useRef()
 
-  function handleUpdateAccountInfo() {
+  useEffect(() => {
+    const fetchData = async () => {
+      let token = loadToken()
+      let request = requestUserInfo(token)
+      const [success, data] = await request
+      if (success) {
+        setInitData(data)
+      }
+    }
+    fetchData()
+  }, [])
 
+  async function handleUpdateAccountInfo(e) {
+    e.preventDefault()
+    let user = {
+      email: (emailRef.current.value === '') ? initData.email : emailRef.current.value,
+      first_name: (firstNameRef.current.value === '') ? initData.first_name : firstNameRef.current.value,
+      last_name: (lastNameRef.current.value === '') ? initData.last_name : lastNameRef.current.value,
+      address: (addressRef.current.value === '') ? initData.address : addressRef.current.value,
+      city: (cityRef.current.value === '') ? initData.city : cityRef.current.value,
+      zip_code: (zipCodeRef.current.value === '') ? initData.zip_code : zipCodeRef.current.value,
+    }
+    console.log(user)
+    let token = loadToken()
+    let request = requestEditUserInfo(user, token)
+    const [success, data] = await request
+    if (success) {
+      console.log("Updated user info!")
+    } else {
+      console.error("Error when updating user info")
+    }
   }
 
   function handleUpdatePassword() {
@@ -47,31 +87,31 @@ export default function Profile() {
                 <Row className="mb-3" style={{ marginTop: 10}} >
                   <Form.Group as={Col}>
                     <Form.Label>First name</Form.Label>
-                    <Form.Control placeholder={currentUser.name} />
+                    <Form.Control ref={firstNameRef} placeholder={initData.first_name} />
                   </Form.Group>
                   <Form.Group as={Col}>
                     <Form.Label>Last name</Form.Label>
-                    <Form.Control placeholder={currentUser.surname} />
+                    <Form.Control ref={lastNameRef} placeholder={initData.last_name} />
                   </Form.Group>
                 </Row>
                 <Row className="mb-3">
                   <Form.Group>
                     <Form.Label>Email</Form.Label>
-                    <Form.Control placeholder={currentUser.email} />
+                    <Form.Control ref={emailRef} placeholder={initData.email} />
                   </Form.Group>
                 </Row>
                 <Row className="mb-3">
                   <Form.Group as={Col} xs="5">
                     <Form.Label>Address</Form.Label>
-                    <Form.Control placeholder={currentUser.address} />
+                    <Form.Control ref={addressRef} placeholder={initData.address} />
                   </Form.Group>
                   <Form.Group as={Col} xs="4">
                     <Form.Label>City</Form.Label>
-                    <Form.Control placeholder={currentUser.city} />
+                    <Form.Control ref={cityRef} placeholder={initData.city} />
                   </Form.Group>
                   <Form.Group as={Col} xs="3">
                     <Form.Label>Zip</Form.Label>
-                    <Form.Control placeholder={currentUser.zipcode} />
+                    <Form.Control ref={zipCodeRef} placeholder={initData.zip_code} />
                   </Form.Group>
                 </Row>
                 <Button variant="primary" type="submit" onClick={handleUpdateAccountInfo}>

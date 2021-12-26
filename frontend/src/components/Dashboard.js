@@ -1,6 +1,8 @@
 import React, {useState, useRef, useEffect} from "react";
 import { Card, Col, Container, Form, Row, ListGroup, Table, ProgressBar } from "react-bootstrap";
 
+import { useAuth } from '../contexts/AuthContext'
+
 export default function Dashboard() {
   const [windSpeed, setWindSpeed] = useState(5) // [m/s]
   const [temp, setTemp] = useState(20) // [Degrees celsius]
@@ -10,6 +12,14 @@ export default function Dashboard() {
   const [using, setUsing] = useState(50) // [%] (to avoid fpp error)
   const [marketPrice, setMarketPrice] = useState(0.65)
   const [bufferCapacity, setBufferCapacity] = useState(5) // [kWh] - [0-13.5]
+
+  const { currentUser } = useAuth()
+
+  useEffect(() => {
+    // TODO: Don't hardcode server endpoints
+
+    // TODO: Query simulation
+  })
 
   const net = production - consumption;
   const storingDisabled = false; //net < 0;

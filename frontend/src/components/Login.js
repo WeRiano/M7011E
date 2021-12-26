@@ -1,5 +1,5 @@
-import { Container, Form, Col, Row, Button, Card } from 'react-bootstrap'
-import React, {useState} from "react";
+import { Container, Form, Col, Row, Button, Card, Modal } from 'react-bootstrap'
+import React, { useState, useEffect } from "react";
 import { useRef } from 'react';
 
 import { useAuth } from '../contexts/AuthContext'
@@ -8,28 +8,50 @@ import { Link, useNavigate } from "react-router-dom"
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const { login, logout } = useAuth()
   const [error, setError] = useState('');
+  const [showError, setShowError] = useState(false);
+
   const [loading, setLoading] = useState(false);
+
+  const { currentUser, login, logout } = useAuth()
 
   const navigate = useNavigate();
 
-  logout()
+  useEffect(() => {
+    if (currentUser != null) navigate('/dashboard')
+  })
 
-  function handleSubmit(e) {
+  function handleShowError(err) {
+    setError(err)
+    setShowError(true)
+  }
+
+  function handleCloseError() {
+    setError("")
+    setShowError(false)
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault()
-    setError('')
 
     setLoading(true)
-    login(emailRef.current.value, passwordRef.current.value)
+    let success = await login(emailRef.current.value, passwordRef.current.value)
     setLoading(false)
 
-    // if successful
-    navigate('/dashboard')
+    if (success) {
+      navigate('/dashboard')
+    } else {
+      handleShowError("Wrong username or password")
+    }
   }
 
   return (
     <Container>
+      <Modal show={showError} onHide={handleCloseError}>
+        <Modal.Header closeButton>
+          <Modal.Title>{error}</Modal.Title>
+        </Modal.Header>
+      </Modal>
       <Row className="justify-content-center align-items-start">
         <Col xs lg="3" md="5" sm="7">
           <Card className="text-center"
@@ -50,7 +72,7 @@ export default function Login() {
                   </Form.Group>
                 </Form>
                 <div className="d-grid gap-2">
-                  <Button variant="success"
+                  <Button type="button" variant="success"
                           disabled={loading}
                           onClick={handleSubmit}
                           size="lg" style={{marginTop: 15}}>

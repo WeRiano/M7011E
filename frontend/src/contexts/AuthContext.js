@@ -1,4 +1,9 @@
-import React, {useContext, useState, useRef, useEffect} from 'react'
+import React, {useContext, useState, useEffect} from 'react'
+
+import { requestAuthToken } from '../services/Api'
+import { loadUser, storeUser } from '../services/Storage'
+
+let cryptoJS = require('crypto-js')
 
 const AuthContext = React.createContext()
 
@@ -7,38 +12,35 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const storedUser = JSON.parse(localStorage.getItem('currentUser'))
-  const [currentUser, setCurrentUser] = useState(storedUser)
+  const [currentUser, setCurrentUser] = useState(loadUser())
 
   useEffect(() => {
-    localStorage.setItem('currentUser', JSON.stringify(currentUser))
+    storeUser(currentUser)
   })
 
   function signup(email, password) {
     // API call to backend
   }
 
-  function login(email, password) {
-    // API call to backend, use password
-    // if success, set user to the user defined by the email ...
-    // if false, set user to null
-    var user = {
-      name: "William",
-      email: email
-      // other information fetched from database
+  async function login(email, password) {
+    let request = requestAuthToken(email, password)
+    let [success, data] = await request
+    if (success) {
+      let user = {}
+      storeUser(user, data)
+      setCurrentUser(user)
     }
-    setCurrentUser(user)
-
-    return 0
+    return success
   }
 
   function logout() {
     setCurrentUser(null)
-    localStorage.setItem('currentUser', JSON.stringify(currentUser))
+    storeUser(currentUser)
   }
 
   const value = {
     currentUser,
+    setCurrentUser,
     signup,
     login,
     logout

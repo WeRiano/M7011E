@@ -9,17 +9,22 @@ from rest_framework import status
 from .models import User
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
     data = json.loads(request.body)
+    print(data)
     email = data['email']
+    first_name = data['first_name']
+    last_name = data['last_name']
     address = data['address']
     city = data['city']
     zip_code = data['zip_code']
 
     user = request.user
     user.email = email
+    user.first_name = first_name
+    user.last_name = last_name
     user.address = address
     user.city = city
     user.zip_code = zip_code
@@ -27,6 +32,8 @@ def update_profile(request):
 
     response = {
         'email': email,
+        'first_name': first_name,
+        'last_name': last_name,
         'address': address,
         'city': city,
         'zip_code': zip_code,
