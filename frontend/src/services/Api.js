@@ -77,7 +77,7 @@ function requestEditUserInfo(user, auth_token) {
     let url = "http://127.0.0.1:7999/auth/users/update_profile/"
 
     return fetch(url, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
             "Content-Type": "application/json",
             "Authorization": "Token " + auth_token
@@ -98,4 +98,45 @@ function requestEditUserInfo(user, auth_token) {
     })
 }
 
-export { requestAuthToken, requestUserInfo, requestEditUserInfo, requestEditUserPassword };
+function requestGetUserImage(auth_token) {
+    let url = "http://127.0.0.1:7999/auth/users/get_image/"
+
+    return fetch(url, {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + auth_token
+        }
+    }).then(handleFetchError).then(res => res.blob()).then((blob) => {
+        const imageObjectURL = URL.createObjectURL(blob);
+        return [true, imageObjectURL]
+    }).catch((error) => {
+        console.log(error)
+        return [false, null]
+    })
+}
+
+function requestEditUserImage(img, imgType, auth_token) {
+    // TODO: Don't hardcode location for backend server
+    let url = "http://127.0.0.1:7999/auth/users/update_image/"
+
+    return fetch(url, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + auth_token
+        },
+        body: JSON.stringify({
+            file: img.substring(img.indexOf(",") + 1),
+            type: imgType
+        })
+    }).then(handleFetchError).then(() => {
+        return [true, null]
+    }).catch((error) => {
+        console.log(error)
+        return [false, null]
+    })
+}
+
+export { requestAuthToken, requestUserInfo, requestEditUserInfo, requestEditUserPassword, requestEditUserImage,
+         requestGetUserImage };

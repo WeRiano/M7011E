@@ -65,7 +65,10 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8001",
-    "http://localhost:8001"
+    "http://localhost:8001",
+    "http://127.0.0.1:8014",
+    "http://localhost:8014"
+
 ]
 
 CORS_ALLOWED_METHODS = [
@@ -115,7 +118,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -181,7 +183,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static\\images')
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
+
+#DEFAULT_FILE_STORAGE = 'authapp.storage.OverwriteStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

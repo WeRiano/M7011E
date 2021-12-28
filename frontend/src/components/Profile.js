@@ -1,12 +1,10 @@
-"use no strict";
-
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Col, Container, Form, Row} from "react-bootstrap";
 
 import { useAuth } from '../contexts/AuthContext'
 import { loadToken } from '../services/Storage'
-import { requestUserInfo, requestEditUserInfo, requestEditUserPassword } from '../services/Api'
-import HouseImg from '../house_placeholder.jpg'
+import { requestUserInfo, requestEditUserInfo, requestEditUserPassword, requestEditUserImage, requestGetUserImage }
+  from '../services/Api'
 
 export default function Profile() {
   const [initData, setInitData] = useState({email: "", first_name: "", last_name: "",
@@ -22,16 +20,36 @@ export default function Profile() {
   const newPassConfRef = useRef()
   const curPassRef = useRef()
 
+  const imageRef = useRef()
+  const [imageUploadFile, setImageUploadFile] = useState(null)
+  const [dispImageFile, setDispImageFile] = useState(null)
+
+  const fetchUserImage = async () => {
+    console.log("Fetching user image ...")
+    let token = loadToken()
+    let request = requestGetUserImage(token)
+    const [success, data] = await request
+    if (success) {
+      setDispImageFile(data)
+      console.log("Fetched user image!")
+    } else {
+      console.error("Error when downloading profile picture")
+    }
+  }
+
   useEffect(() => {
-    const fetchData = async () => {
-      let token = loadToken()
+    let token = loadToken()
+
+    const fetchUserInfo = async () => {
       let request = requestUserInfo(token)
       const [success, data] = await request
       if (success) {
         setInitData(data)
       }
     }
-    fetchData()
+
+    fetchUserInfo()
+    fetchUserImage()
   }, [])
 
   async function handleUpdateAccountInfo(e) {
@@ -49,6 +67,7 @@ export default function Profile() {
     const [success, data] = await request
     if (success) {
       console.log("Updated user info!")
+      window.location.reload(false)
     } else {
       console.error("Error when updating user info")
     }
@@ -63,13 +82,43 @@ export default function Profile() {
     const [success, data] = await request
     if (success) {
       console.log("Updated user password!")
+      window.location.reload(false)
     } else {
       console.error("Error when updating user password")
     }
   }
 
-  function handleUpdateImage() {
+  async function handleUpdateImage(e) {
+    e.preventDefault()
 
+    if (imageUploadFile == null) {
+      // TODO: Visual error for user
+      console.log("Please select a file")
+      return
+    }
+    const type_parsed = imageUploadFile.type.split('/')
+    if (type_parsed[0] !== 'image') {
+      // TODO: Visual error for user
+      console.error("Non-image files are not accepted")
+      return
+    }
+    let reader = new FileReader()
+    reader.onerror = () => {
+      // TODO: Visual error for user
+      console.log("Error when loading file: " + reader.error)
+    }
+    reader.onload = async() => {
+      let token = loadToken()
+      let request = requestEditUserImage(reader.result, type_parsed[1], token)
+      const [success, data] = await request
+      if (success) {
+        console.log("Updated profile image successfully")
+        window.location.reload(false)
+      } else {
+        console.error("Error when updating profile image")
+      }
+    }
+    reader.readAsDataURL(imageUploadFile)
   }
 
   return (
@@ -83,16 +132,18 @@ export default function Profile() {
               <Card.Text as="h5">Account information</Card.Text>
               <Row>
               <Col>
-                <Card.Img style={{ width: 640/2, height: 480/2, borderRadius: 5 }} variant="right" src={HouseImg}/>
+                <Card.Img style={{ width: 640/2, height: 480/2, borderRadius: 5 }} variant="right"
+                          src={dispImageFile} />
               </Col>
               <Col>
                 <Form>
                   <Form.Group controlId="formFile" className="mb-3">
-                    <Form.Control type="file" />
+                    <Form.Control type="file"
+                                  onChange={(e) => setImageUploadFile(e.target.files[0]) } />
                   </Form.Group>
                   <Button variant="primary" type="submit" onClick={handleUpdateImage}>
                     Upload
-                </Button>
+                  </Button>
                 </Form>
               </Col>
               </Row>
