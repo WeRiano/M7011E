@@ -1,9 +1,8 @@
 import React, {useContext, useState, useEffect} from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { requestAuthToken } from '../services/Api'
-import { loadUser, storeUser } from '../services/Storage'
-
-let cryptoJS = require('crypto-js')
+import { requestCreateAuthToken, requestDestroyAuthToken, requestCreateUser } from '../services/Api'
+import { loadUser, storeUser, loadToken } from '../services/Storage'
 
 const AuthContext = React.createContext()
 
@@ -14,16 +13,20 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(loadUser())
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     storeUser(currentUser)
   })
 
-  function signup(email, password) {
-    // API call to backend
+  async function signup(user) {
+    let request = requestCreateUser(user)
+    const [success, data] = await request
+    return success
   }
 
   async function login(email, password) {
-    let request = requestAuthToken(email, password)
+    let request = requestCreateAuthToken(email, password)
     let [success, data] = await request
     if (success) {
       let user = {}
@@ -33,9 +36,20 @@ export function AuthProvider({ children }) {
     return success
   }
 
-  function logout() {
-    setCurrentUser(null)
-    storeUser(currentUser)
+  async function logout() {
+    let token = loadToken()
+    if (token == null) {
+      setCurrentUser(null)
+      storeUser(currentUser)
+      return true
+    }
+    let request = requestDestroyAuthToken(token)
+    const [success, data] = await request
+    if (success) {
+      setCurrentUser(null)
+      storeUser(currentUser)
+    }
+    return success
   }
 
   const value = {

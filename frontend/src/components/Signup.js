@@ -1,64 +1,131 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {Button, Card, Col, Container, Form, Row, Alert } from "react-bootstrap";
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Signup() {
-  const emailRef = useRef();
-  const passwordRef = useRef();
-  const passwordConfirmRef = useRef();
+  const emailRef = useRef('')
+  const firstNameRef = useRef('')
+  const lastNameRef = useRef('')
+  const addressRef = useRef('')
+  const cityRef = useRef('')
+  const zipCodeRef = useRef('')
+  const passRef = useRef('')
+  const passConfRef = useRef('')
+
+
   const { signup, logout } = useAuth()
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false);
 
-  logout()
+  const navigate = useNavigate();
 
-  function handleSubmit(e) {
+  useEffect(() => {
+    logout()
+  }, [])
+
+  async function handleSignup(e) {
     e.preventDefault();
-    setError('');
+    setError('')
+    setInfo('')
 
-    if (passwordRef.current.value === passwordConfirmRef.current.value) {
-      return setError('Passwords do not match')
+    if (emailRef.current.value === '' || firstNameRef.current.value === '' ||
+        cityRef.current.value === '' || addressRef.current.value === '' || zipCodeRef.current.value === '' ) {
+      setError('Please provide all the required information')
+      return
+    }
+
+    if (passRef.current.value === '' || passConfRef.current.value === '') {
+      setError('Please provide a password and a confirmation')
+      return
+    }
+
+    if (passRef.current.value !== passConfRef.current.value) {
+      setError('Passwords do not match')
+      return
     }
 
     setLoading(true)
-    signup(emailRef.current.value, passwordRef.current.value)
+    let user = {
+      first_name: firstNameRef.current.value,
+      last_name: lastNameRef.current.value,
+      address: addressRef.current.value,
+      city: cityRef.current.value,
+      zip_code: zipCodeRef.current.value,
+      email: emailRef.current.value,
+      password: passRef.current.value,
+      confirm_password: passConfRef.current.value
+    }
+    let success = await signup(user)
     setLoading(false)
+
+    if (success) {
+      setInfo('New user created successfully')
+    } else {
+      setError('Server error when creating user. Try again')
+    }
   }
 
   return (
     <Container>
       <Row className="justify-content-center align-items-start">
-        <Col xs lg="3" md="5" sm="7">
+        <Col xs xxl="4" xl="7" lg="8" md="10" sm="10">
           <Card className="text-center"
                 style={{ marginTop: 100}}>
             <Card.Header as="h5"> Sign Up </Card.Header>
             <Card.Body>
               { error && <Alert variant="danger">{error}</Alert> }
+              { info && <Alert variant="success">{info}</Alert> }
               <div className="gap-2">
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group controlId="formEmail">
-                    <Form.Label> Email Address </Form.Label>
-                    <Form.Control type="email" placeholder="example@email.com"
-                                  ref={emailRef} />
-                  </Form.Group>
-                  <Form.Group controlId="formPassword"
-                              style={{ marginTop: 15 }}>
-                    <Form.Label> Password </Form.Label>
-                    <Form.Control type="password"
-                                  ref={passwordRef} />
-                  </Form.Group>
-                  <Form.Group controlId="formConfirmPassword"
-                              style={{ marginTop: 15 }}>
-                    <Form.Label> Confirm Password </Form.Label>
-                    <Form.Control type="password"
-                                  ref={passwordConfirmRef} />
-                  </Form.Group>
+                <Form onSubmit={handleSignup}>
+                  <Row className="mb-3">
+                    <Form.Group>
+                      <Form.Label style={{ color: "red" }}>*</Form.Label><Form.Label>Email</Form.Label>
+                      <Form.Control ref={emailRef} placeholder={'example@email.com'} />
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3" style={{ marginTop: 10 }} >
+                    <Form.Group as={Col}>
+                      <Form.Label style={{ color: "red" }}>*</Form.Label><Form.Label> First name</Form.Label>
+                      <Form.Control ref={firstNameRef}  />
+                    </Form.Group>
+                    <Form.Group as={Col}>
+                      <Form.Label>Last name</Form.Label>
+                      <Form.Control ref={lastNameRef}  />
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3">
+                    <Form.Group as={Col} xs="5">
+                      <Form.Label style={{ color: "red" }}>*</Form.Label><Form.Label>Address</Form.Label>
+                      <Form.Control ref={addressRef}  />
+                    </Form.Group>
+                    <Form.Group as={Col} xs="4">
+                      <Form.Label style={{ color: "red" }}>*</Form.Label><Form.Label>City</Form.Label>
+                      <Form.Control ref={cityRef} />
+                    </Form.Group>
+                    <Form.Group as={Col} xs="3">
+                      <Form.Label style={{ color: "red" }}>*</Form.Label><Form.Label>Zip</Form.Label>
+                      <Form.Control ref={zipCodeRef} />
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3">
+                    <Form.Group as={Col}>
+                      <Form.Label style={{ color: "red" }}>*</Form.Label><Form.Label>Password</Form.Label>
+                      <Form.Control type="password" ref={passRef} />
+                    </Form.Group>
+                  </Row>
+                  <Row className="mb-3">
+                    <Form.Group as={Col}>
+                      <Form.Label style={{ color: "red" }}>*</Form.Label><Form.Label>Confirm Password</Form.Label>
+                      <Form.Control type="password" ref={passConfRef} />
+                    </Form.Group>
+                  </Row>
                 </Form>
                 <div className="d-grid gap-2">
                 <Button variant="success" size="lg" style={{ marginTop: 15 }}
-                        disabled={loading} >
+                        disabled={loading} onClick={handleSignup} >
                   Create account
                 </Button>
                 <div className="w-100 text-center mt-2">

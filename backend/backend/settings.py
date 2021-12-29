@@ -187,8 +187,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'static\\images')
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
-#DEFAULT_FILE_STORAGE = 'authapp.storage.OverwriteStorage'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 

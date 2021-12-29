@@ -6,11 +6,14 @@ import { useAuth } from '../contexts/AuthContext'
 
 export default function NavigationBar() {
   const { currentUser, logout } = useAuth()
+
   const navigate = useNavigate();
 
-  function handleLogout() {
-    logout()
-    navigate('/')
+  async function handleLogout() {
+    let success = await logout()
+    if (success) {
+      navigate('/')
+    }
   }
 
   return (

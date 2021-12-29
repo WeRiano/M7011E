@@ -1,6 +1,5 @@
-import { Container, Form, Col, Row, Button, Card, Modal } from 'react-bootstrap'
-import React, { useState, useEffect } from "react";
-import { useRef } from 'react';
+import { Container, Form, Col, Row, Button, Card, Alert } from 'react-bootstrap'
+import React, { useState, useEffect, useRef } from "react";
 
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useNavigate } from "react-router-dom"
@@ -9,7 +8,6 @@ export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const [error, setError] = useState('');
-  const [showError, setShowError] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -18,18 +16,12 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    logout()
+  }, [])
+
+  useEffect(() => {
     if (currentUser != null) navigate('/dashboard')
   })
-
-  function handleShowError(err) {
-    setError(err)
-    setShowError(true)
-  }
-
-  function handleCloseError() {
-    setError("")
-    setShowError(false)
-  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -41,23 +33,19 @@ export default function Login() {
     if (success) {
       navigate('/dashboard')
     } else {
-      handleShowError("Wrong username or password")
+      setError("Wrong username or password")
     }
   }
 
   return (
     <Container>
-      <Modal show={showError} onHide={handleCloseError}>
-        <Modal.Header closeButton>
-          <Modal.Title>{error}</Modal.Title>
-        </Modal.Header>
-      </Modal>
       <Row className="justify-content-center align-items-start">
         <Col xs lg="3" md="5" sm="7">
           <Card className="text-center"
                 style={{marginTop: 100}}>
             <Card.Header as="h5"> Log In </Card.Header>
             <Card.Body>
+              {error && <Alert variant="danger">{error}</Alert>}
               <div className="gap-2">
                 <Form>
                   <Form.Group controlId="formEmail">

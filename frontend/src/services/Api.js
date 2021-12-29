@@ -7,7 +7,35 @@ function handleFetchError(response) {
     return response;
 }
 
-function requestAuthToken(email, password) {
+function requestCreateUser(user) {
+    let url = "http://127.0.0.1:7999/auth/users/"
+
+    let body = {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        address: user.address,
+        city: user.city,
+        zip_code: user.zip_code,
+        email: user.email,
+        password: user.password,
+        re_password: user.confirm_password
+    }
+
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    }).then(handleFetchError).then(res => res.json()).then((data) => {
+        return [true, data]
+    }).catch((error) => {
+        console.log(error)
+        return [false, null]
+    })
+}
+
+function requestCreateAuthToken(email, password) {
     // TODO: Don't hardcode location for backend server
     let url = "http://127.0.0.1:7999/auth/token/login/"
 
@@ -25,6 +53,24 @@ function requestAuthToken(email, password) {
         body: JSON.stringify(body)
     }).then(handleFetchError).then(res => res.json()).then((data) => {
         return [true, data["auth_token"]]
+    }).catch((error) => {
+        console.log(error)
+        return [false, null]
+    })
+}
+
+function requestDestroyAuthToken(auth_token) {
+    // TODO: Don't hardcode location for backend server
+    let url = "http://127.0.0.1:7999/auth/token/logout/"
+
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + auth_token
+        }
+    }).then(handleFetchError).then(() => {
+        return [true, null]
     }).catch((error) => {
         console.log(error)
         return [false, null]
@@ -138,5 +184,5 @@ function requestEditUserImage(img, imgType, auth_token) {
     })
 }
 
-export { requestAuthToken, requestUserInfo, requestEditUserInfo, requestEditUserPassword, requestEditUserImage,
-         requestGetUserImage };
+export { requestCreateAuthToken, requestDestroyAuthToken, requestUserInfo, requestEditUserInfo,
+         requestEditUserPassword, requestEditUserImage, requestGetUserImage, requestCreateUser };

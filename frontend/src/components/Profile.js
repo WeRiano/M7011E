@@ -20,7 +20,6 @@ export default function Profile() {
   const newPassConfRef = useRef()
   const curPassRef = useRef()
 
-  const imageRef = useRef()
   const [imageUploadFile, setImageUploadFile] = useState(null)
   const [dispImageFile, setDispImageFile] = useState(null)
 
