@@ -22,6 +22,11 @@ class Delta:
 
     def __init__(self, state: State, hour, day, month):
         self.__state: State = state
+
+        # Time between simulation updates. One update = one hour has passed
+        self.__update_frequency = 3600
+
+            # Real time
         # Daily hour. Starts at 0 and ends at 23.
         self.__hour: int = hour
         # Day of the month. Starts at 0 and ends at either 27, 29 or 30 (leap years dont exist (for now)).
@@ -39,15 +44,14 @@ class Delta:
     # The wind simulation is split up into two parts: simulating daily and hourly wind.
     # The daily wind is based upon observations from
     # https://weatherspark.com/y/89129/Average-Weather-in-Lule%C3%A5-Sweden-Year-Round
-    # and drawn from a normal distribution. The hourly wind is based upon the daily wind and drawn
-    # from a normal distribution
+    # and drawn from a normal distribution.
+    # The hourly wind is based upon the daily wind and drawn from a normal distribution
     def tick_hour(self):
         days_in_month = [30, 27, 30, 29, 30, 29, 30, 30, 29, 30, 29, 30]
         if self.__hour == 24:
             # New day!
             self.__update_daily_ws_mu()
 
-            # New day!
             self.__hour = 0
             self.__day = self.__day + 1
             if self.__day > days_in_month[self.__month]:
@@ -102,11 +106,8 @@ class Delta:
         self.__temp = float(data["stations"][0]["temp"])
         return float(data["stations"][0]["temp"])
 
+    def get_delta(self):
+        return self.__update_frequency
 
-def sim_real_time_driver():
-    state = State()
-    delta = Delta(state, 0, 1, 1)
-    while True:
-        delta.tick_hour()
-        delta.update_state()
-        sleep(3600)
+    def get_state(self):
+        return self.__state

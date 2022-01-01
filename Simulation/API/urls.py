@@ -18,8 +18,9 @@ class FloatConverter:
 register_converter(FloatConverter, 'float')
 
 urlpatterns = [
-    path('weather/temp/', views.api_get_temp),
-    path('weather/wind_speed/', views.api_get_wind_speed),
+    path('get_conditions', views.api_get_conditions),
+    #path('weather/temp/', views.api_get_temp),
+    #path('weather/wind_speed/', views.api_get_wind_speed),
 
     path('economy/net_price/demand/<float:demand>/', views.api_get_net_price, name="Test"),
     path('economy/market_price/', views.api_get_market_price),

@@ -1,25 +1,36 @@
 import React, {useState, useRef, useEffect} from "react";
 import { Card, Col, Container, Form, Row, ListGroup, Table, ProgressBar } from "react-bootstrap";
 
-import { useAuth } from '../contexts/AuthContext'
+import { requestGetSimCond } from '../services/api/Simulation'
+import { loadToken} from "../services/Storage";
 
 export default function Dashboard() {
-  const [windSpeed, setWindSpeed] = useState(5) // [m/s]
-  const [temp, setTemp] = useState(20) // [Degrees celsius]
-  const [production, setProduction] = useState(2) // [kWh]
-  const [consumption, setConsumption] = useState(3)  // [kWh]
-  const [storing, setStoring] = useState(50) // [%] (to avoid fpp error)
-  const [using, setUsing] = useState(50) // [%] (to avoid fpp error)
-  const [marketPrice, setMarketPrice] = useState(0.65)
-  const [bufferCapacity, setBufferCapacity] = useState(5) // [kWh] - [0-13.5]
+  const [windSpeed, setWindSpeed] = useState(-1) // [m/s]
+  const [temp, setTemp] = useState(-1) // [Degrees celsius]
+  const [production, setProduction] = useState(-1) // [kWh]
+  const [consumption, setConsumption] = useState(-1)  // [kWh]
+  const [storing, setStoring] = useState(-1) // [%] (to avoid fpp error)
+  const [using, setUsing] = useState(-1) // [%] (to avoid fpp error)
+  const [marketPrice, setMarketPrice] = useState(-1)
+  const [bufferCapacity, setBufferCapacity] = useState(1) // [kWh] - [0-13.5]
 
-  const { currentUser } = useAuth()
-
-  useEffect(() => {
+  useEffect(async() => {
     // TODO: Don't hardcode server endpoints
+    let token = loadToken()
+    let request = await requestGetSimCond(token)
+    const [success, data] = await request
+    if (success) {
+      setWindSpeed(data["wind_speed"])
+      setTemp(data["temperature"])
+      setMarketPrice(data["market_price"])
+      setProduction(data["prod_power"])
+      setBufferCapacity(data["buffer_capacity"])
+      console.log(data)
+    } else {
+      // TODO: Visual error for user
+    }
 
-    // TODO: Query simulation
-  })
+  }, [])
 
   const net = production - consumption;
   const storingDisabled = false; //net < 0;

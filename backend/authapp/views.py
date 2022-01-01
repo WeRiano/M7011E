@@ -6,11 +6,18 @@ from rest_framework.permissions import IsAuthenticated
 import json
 import base64
 from rest_framework import status
+import os
 
 from backend.settings import MEDIA_ROOT
-from .models import User
+from authapp.models import User
 
-import os
+
+@api_view(['GET'])
+def get_number_of_users(request):
+    response = {
+        "number_of_users": User.objects.all().count()
+    }
+    return Response(data=response, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -49,6 +56,7 @@ def update_profile(request):
 @permission_classes([IsAuthenticated])
 def get_profile(request):
     result = {
+        'id': request.user.id,
         'email': request.user.email,
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,
@@ -57,6 +65,15 @@ def get_profile(request):
         'zip_code': request.user.zip_code
     }
     return Response(data=result, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_id(request):
+    response = {
+        "user_id": request.user.id
+    }
+    return Response(data=response, status=status.HTTP_200_OK)
 
 
 @api_view(['PUT'])

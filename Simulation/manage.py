@@ -3,9 +3,6 @@
 import os
 import sys
 
-from threading import Thread
-from Simulation.delta import sim_real_time_driver
-
 
 def main():
     """Run administrative tasks."""
@@ -22,6 +19,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sim_thread = Thread(target=sim_real_time_driver)
-    sim_thread.start()
     main()

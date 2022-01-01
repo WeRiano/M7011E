@@ -1,10 +1,20 @@
+import json
+from rest_framework import status
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
-
-from Simulation.state import State
-
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
+
+from Simulation.state import State
+from Simulation.manager import Manager
+
+
+@api_view(['GET'])
+def api_get_conditions(request):
+    print(request.content_params)
+    conditions = Manager.get_conditions(request.content_params, request.headers['Authorization'])
+    print("Hello")
+    return Response(data=conditions, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['weather'],
@@ -12,7 +22,7 @@ from drf_spectacular.types import OpenApiTypes
                summary="Get the current temperature")
 @api_view(['GET'])
 def api_get_temp(request):
-    temp = State.instance.get_temp()
+    temp = Manager.get_temp(request.headers['authorization'])
     response = {
         "value": temp
     }

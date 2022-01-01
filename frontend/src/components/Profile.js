@@ -4,7 +4,7 @@ import { Button, Card, Col, Container, Form, Row} from "react-bootstrap";
 import { useAuth } from '../contexts/AuthContext'
 import { loadToken } from '../services/Storage'
 import { requestUserInfo, requestEditUserInfo, requestEditUserPassword, requestEditUserImage, requestGetUserImage }
-  from '../services/Api'
+  from '../services/api/Backend'
 
 export default function Profile() {
   const [initData, setInitData] = useState({email: "", first_name: "", last_name: "",

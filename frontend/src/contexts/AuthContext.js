@@ -1,7 +1,7 @@
 import React, {useContext, useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { requestCreateAuthToken, requestDestroyAuthToken, requestCreateUser } from '../services/Api'
+import { requestCreateAuthToken, requestDestroyAuthToken, requestCreateUser } from '../services/api/Backend'
 import { loadUser, storeUser, loadToken } from '../services/Storage'
 
 const AuthContext = React.createContext()

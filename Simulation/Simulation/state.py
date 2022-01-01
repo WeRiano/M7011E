@@ -2,27 +2,18 @@ import math
 
 
 class State:
-    instance = None
-
     __temp: float               # [degrees celsius]
     __wind_speed: float         # [m/s]
-    __e_prod_power: float       # [kWh] - function of the wind. How much energy the wind-turbine can produce for 1 hour.
-    __e_market_price: float     # [kr/kWh]
-
+    __prod_power: float         # [kWh] - function of the wind. How much energy the wind-turbine can produce for 1 hour.
+    __market_price: float       # [kr/kWh]
     __buffer: float             # [kWh] - [0, 13.5]
-
-    def __init__(self):
-        if State.instance is None:
-            State.instance = self
-        else:
-            raise Exception("State instance already created!")
-            return
 
     def update_state_conditions(self, ws, temp, market_price):
         self.__wind_speed = ws
         self.__temp = temp
-        self.__e_market_price = market_price
-        self.__e_prod_power = State.__calc_prod_power(ws, temp)
+        self.__market_price = market_price
+        self.__prod_power = State.__calc_prod_power(ws, temp)
+        self.__buffer = 0
 
     @staticmethod
     def __calc_prod_power(ws, temp):
@@ -62,15 +53,15 @@ class State:
         return result
 
     def get_total_price(self, demand):
-        if demand > self.__e_prod_power:
-            diff = demand - self.__e_prod_power
-            return diff * self.__e_market_price
+        if demand > self.__prod_power:
+            diff = demand - self.__prod_power
+            return diff * self.__market_price
         else:
             # Woo I am self sufficient!
             return 0
 
     def get_market_price(self) -> float:
-        return self.__e_market_price
+        return self.__market_price
 
     def get_wind_speed(self) -> float:
         return self.__wind_speed
@@ -78,7 +69,35 @@ class State:
     def get_temp(self) -> float:
         return self.__temp
 
-
-
     def get_prod_power(self) -> float:
-        return self.__e_prod_power
+        return self.__prod_power
+
+    def get_conditions(self, data_filter):
+        result = {}
+        if type(data_filter["conditions"]) == str and data_filter["conditions"].lower() == "all":
+            result["wind_speed"] = self.__wind_speed
+            result["temperature"] = self.__temp
+            result["market_price"] = self.__market_price
+            result["prod_power"] = self.__prod_power
+            result["buffer_capacity"] = self.__buffer
+            return result
+        elif type(data_filter["conditions"]) == list:
+            for element in data_filter["conditions"]:
+                if element.lower() == "wind_speed":
+                    result["wind_speed"] = self.__wind_speed
+                    continue
+                if element == "temperature":
+                    result["temperature"] = self.__temp
+                    continue
+                if element == "market_price":
+                    result["market_price"] = self.__market_price
+                    continue
+                if element == "prod_power":
+                    result["prod_power"] = self.__prod_power
+                    continue
+                if element == "buffer_capacity":
+                    result["buffer_capacity"] = self.__buffer
+                    continue
+        else:
+            result["error"] = "The parameter \"conditions\" is invalid. See documentation for more info."
+        return result

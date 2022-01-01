@@ -1,11 +1,4 @@
-let cryptoJS = require('crypto-js')
-
-function handleFetchError(response) {
-    if (!response.ok) {
-        throw Error(response.statusText);
-    }
-    return response;
-}
+import { handleFetchError } from "./ErrorHandling";
 
 function requestCreateUser(user) {
     let url = "http://127.0.0.1:7999/auth/users/"
