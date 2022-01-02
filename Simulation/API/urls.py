@@ -18,14 +18,9 @@ class FloatConverter:
 register_converter(FloatConverter, 'float')
 
 urlpatterns = [
-    path('get_conditions', views.api_get_conditions),
-    #path('weather/temp/', views.api_get_temp),
-    #path('weather/wind_speed/', views.api_get_wind_speed),
-
-    path('economy/net_price/demand/<float:demand>/', views.api_get_net_price, name="Test"),
-    path('economy/market_price/', views.api_get_market_price),
-
-    path('turbine/power/', views.api_get_prod_power),
+    path('get_current_conditions/<slug:conditions>/', views.get_conditions),
+    path('set_update_frequency/<float:delta>/', views.set_delta),
+    path('set_buffer_settings/<float:saving>/<float:using>/', views.set_ratios),
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('schema/swagger-ui', SpectacularSwaggerView.as_view(), name='swagger-ui')

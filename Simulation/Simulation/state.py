@@ -4,16 +4,29 @@ import math
 class State:
     __temp: float               # [degrees celsius]
     __wind_speed: float         # [m/s]
-    __prod_power: float         # [kWh] - function of the wind. How much energy the wind-turbine can produce for 1 hour.
+    __prod_power: float         # [kWh]
+    __consumption: float        # [kWh]
     __market_price: float       # [kr/kWh]
-    __buffer: float             # [kWh] - [0, 13.5]
+    __buffer: float = 0.0       # [kWh] - [0, 13.5]
+    __bank: float = 0           # [kr]
 
-    def update_state_conditions(self, ws, temp, market_price):
+    def update_state_conditions(self, ws, temp, market_price, consumption, savingPercent, usingPercent):
         self.__wind_speed = ws
         self.__temp = temp
         self.__market_price = market_price
         self.__prod_power = State.__calc_prod_power(ws, temp)
-        self.__buffer = 0
+        self.__consumption = consumption
+        net = self.__prod_power - consumption
+        if net >= 0:
+            self.__buffer += net * savingPercent
+            self.__bank += net * market_price * (1-savingPercent)
+        elif net < 0:
+            self.__buffer += (self.__prod_power - consumption) * usingPercent
+            self.__bank += net * market_price * (1-usingPercent)
+
+        self.__buffer = max(0, min(self.__buffer, 13.5))
+
+        self.__log()
 
     @staticmethod
     def __calc_prod_power(ws, temp):
@@ -33,7 +46,7 @@ class State:
         # "is defined as the ratio of the power captured by the rotor of the wind turbine, p_r,
         # divided by the total power available in the wind, P
         # TODO: Improve this??? Coefficient varies dependent on wind speed
-        Cp = 0.4
+        Cp = 0.45
 
         # ρ is the air density in kg/m3 where (https://en.wikipedia.org/wiki/Density_of_air)
         abs_pr = 101325  # absolute pressure (Pa)
@@ -43,13 +56,12 @@ class State:
 
         # A is the swept area of the turbine in m2. Lets pretend that all users have the same turbine and that the
         # length of the rotor blades are ...
-        blade_len = 2  # [m]
+        blade_len = 5.5  # [m]
         A = math.pi * (blade_len * blade_len)
         p_turbine = 1 / 2 * Cp * p * A * (ws * ws * ws)  # [W]
 
         result = p_turbine / 1000
         # TODO: Add cut-in and cut-out values? Is there a wind speed that generates 0 power?
-        print("The wind turbine is now generating: " + str(result) + " kWh energy every hour!")
         return result
 
     def get_total_price(self, demand):
@@ -72,32 +84,41 @@ class State:
     def get_prod_power(self) -> float:
         return self.__prod_power
 
-    def get_conditions(self, data_filter):
+    def get_conditions(self, filter_slug):
         result = {}
-        if type(data_filter["conditions"]) == str and data_filter["conditions"].lower() == "all":
+        filter_list = filter_slug.split("-")
+        if len(filter_list) == 0 or filter_list[0] == "all":
             result["wind_speed"] = self.__wind_speed
             result["temperature"] = self.__temp
             result["market_price"] = self.__market_price
             result["prod_power"] = self.__prod_power
             result["buffer_capacity"] = self.__buffer
+            result["consumption"] = self.__consumption
+            result["bank"] = self.__bank
             return result
-        elif type(data_filter["conditions"]) == list:
-            for element in data_filter["conditions"]:
-                if element.lower() == "wind_speed":
+        else:
+            for condition in filter_list["conditions"]:
+                if condition.lower() == "wind_speed":
                     result["wind_speed"] = self.__wind_speed
                     continue
-                if element == "temperature":
+                if condition.lower() == "temperature":
                     result["temperature"] = self.__temp
                     continue
-                if element == "market_price":
+                if condition.lower() == "market_price":
                     result["market_price"] = self.__market_price
                     continue
-                if element == "prod_power":
+                if condition.lower() == "prod_power":
                     result["prod_power"] = self.__prod_power
                     continue
-                if element == "buffer_capacity":
+                if condition.lower() == "buffer_capacity":
                     result["buffer_capacity"] = self.__buffer
                     continue
-        else:
-            result["error"] = "The parameter \"conditions\" is invalid. See documentation for more info."
+                if condition.lower() == "consumption":
+                    result["consumption"] = self.__consumption
+                    continue
         return result
+
+    def __log(self):
+        #print("The wind turbine is now generating: " + str(self.__prod_power) + " kWh energy every hour")
+        #print("The household is currently consuming: " + str(self.__consumption) + " kWh energy every hour")
+        print("Net production: " + str(self.__prod_power - self.__consumption))

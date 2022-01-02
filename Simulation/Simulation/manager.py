@@ -12,13 +12,35 @@ class Manager:
     instances: Dict[int, Delta] = {}
 
     @staticmethod
-    def get_conditions(data_filter, auth_token):
+    def set_delta(auth_token, delta):
         user_id = Manager.__request_get_user_id(auth_token)
         try:
-            return Manager.instances[user_id].get_state().get_conditions(data_filter)
+            Manager.instances[user_id].set_delta(delta)
         except KeyError:
             Manager.__start_instance(user_id)
-            return Manager.instances[user_id].get_state().get_conditions(data_filter)
+            Manager.instances[user_id].set_delta(delta)
+
+    @staticmethod
+    def set_ratios(saving, using, auth_token):
+        user_id = Manager.__request_get_user_id(auth_token)
+        try:
+            Manager.instances[user_id].set_ratios(saving, using)
+        except KeyError:
+            Manager.__start_instance(user_id)
+            Manager.instances[user_id].set_ratios(saving, using)
+
+    @staticmethod
+    def get_conditions(filter_slug, auth_token):
+        user_id = Manager.__request_get_user_id(auth_token)
+        try:
+            state_cond = Manager.instances[user_id].get_state().get_conditions(filter_slug)
+            delta_cond = Manager.instances[user_id].get_conditions(filter_slug)
+            return {**state_cond, **delta_cond}
+        except KeyError:
+            Manager.__start_instance(user_id)
+            state_cond = Manager.instances[user_id].get_state().get_conditions(filter_slug)
+            delta_cond = Manager.instances[user_id].get_conditions(filter_slug)
+            return {**state_cond, **delta_cond}
 
     @staticmethod
     def __instance_driver(delta):
@@ -53,9 +75,3 @@ class Manager:
         }
         r = request_get(url, headers=header)
         return r.json()['id']
-
-
-
-
-
-
