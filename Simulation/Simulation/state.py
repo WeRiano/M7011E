@@ -10,7 +10,9 @@ class State:
     __buffer: float = 0.0       # [kWh] - [0, 13.5]
     __bank: float = 0           # [kr]
 
-    def update_state_conditions(self, ws, temp, market_price, consumption, savingPercent, usingPercent):
+    __buffer_max = 13.5
+
+    def update_state_conditions(self, ws, temp, market_price, consumption, storing, using):
         self.__wind_speed = ws
         self.__temp = temp
         self.__market_price = market_price
@@ -18,15 +20,20 @@ class State:
         self.__consumption = consumption
         net = self.__prod_power - consumption
         if net >= 0:
-            self.__buffer += net * savingPercent
-            self.__bank += net * market_price * (1-savingPercent)
+            if self.__buffer + net * storing > State.__buffer_max:
+                storing = (State.__buffer_max - self.__buffer) / net
+            self.__buffer += net * storing
+            self.__bank += net * market_price * (1-storing)
         elif net < 0:
-            self.__buffer += (self.__prod_power - consumption) * usingPercent
-            self.__bank += net * market_price * (1-usingPercent)
+            if self.__buffer + net * using < 0.0:
+                using = abs( (0 - self.__buffer) / net )
+            self.__buffer += (self.__prod_power - consumption) * using
+            self.__bank += net * market_price * (1-using)
 
-        self.__buffer = max(0, min(self.__buffer, 13.5))
+        #self.__buffer = max(0, min(self.__buffer, State.__buffer_max))
 
         self.__log()
+        return storing, using
 
     @staticmethod
     def __calc_prod_power(ws, temp):
@@ -122,3 +129,4 @@ class State:
         #print("The wind turbine is now generating: " + str(self.__prod_power) + " kWh energy every hour")
         #print("The household is currently consuming: " + str(self.__consumption) + " kWh energy every hour")
         print("Net production: " + str(self.__prod_power - self.__consumption))
+        print("Buffer size: " + str(self.__buffer))

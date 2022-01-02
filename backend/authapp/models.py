@@ -91,7 +91,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     address = models.CharField(max_length=100)
     city = models.CharField(max_length=40)
     zip_code = models.IntegerField(validators=[MinValueValidator(10000, "ZIP code does not exist"),
-                                               MaxValueValidator(99000, "ZIP code does not exist")])
+                                               MaxValueValidator(98999, "ZIP code does not exist")])
     house_img = models.ImageField(upload_to='', max_length=25, default='default_prof_pic.jpeg')
 
     objects = UserManager()

@@ -45,7 +45,7 @@ export default function Login() {
                 style={{marginTop: 100}}>
             <Card.Header as="h5"> Log In </Card.Header>
             <Card.Body>
-              {error && <Alert variant="danger">{error}</Alert>}
+              { error && <Alert variant="danger">{error}</Alert> }
               <div className="gap-2">
                 <Form>
                   <Form.Group controlId="formEmail">

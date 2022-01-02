@@ -74,4 +74,7 @@ class Manager:
             "Authorization": token_header
         }
         r = request_get(url, headers=header)
-        return r.json()['id']
+        try:
+            return r.json()['id']
+        except KeyError:
+            return -1

@@ -14,16 +14,23 @@ function requestCreateUser(user) {
         re_password: user.confirm_password
     }
 
+    let inputErr = false
+
     return fetch(url, {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
-    }).then(handleFetchError).then(res => res.json()).then((data) => {
-        return [true, data]
-    }).catch((error) => {
-        console.log(error)
+    }).then(handleFetchError).then(res => {
+        if (res.status === 400) {
+            inputErr = true
+        }
+        return res.json()
+    }).then((data) => {
+        return (inputErr) ? [false, data] : [true, data]
+    }).catch(error => {
+        console.error(error)
         return [false, null]
     })
 }
@@ -38,16 +45,22 @@ function requestCreateAuthToken(email, password) {
         // other information fetched from database
     }
 
+    let inputErr = false
     return fetch(url, {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
-    }).then(handleFetchError).then(res => res.json()).then((data) => {
-        return [true, data["auth_token"]]
+    }).then(handleFetchError).then(res => {
+        if (res.status === 400) {
+            inputErr = true
+        }
+        return res.json()
+    }).then((data) => {
+        return (inputErr) ? [false, data] : [true, data]
     }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return [false, null]
     })
 }
@@ -65,7 +78,7 @@ function requestDestroyAuthToken(auth_token) {
     }).then(handleFetchError).then(() => {
         return [true, null]
     }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return [false, null]
     })
 }
@@ -83,7 +96,7 @@ function requestUserInfo(auth_token) {
     }).then(handleFetchError).then(res => res.json()).then((data) => {
         return [true, data]
     }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return [false, null]
     })
 }
@@ -92,6 +105,7 @@ function requestEditUserPassword(newPassword, confirmNewPassword, currentPasswor
     // TODO: Don't hardcode location for backend server
     let url = "http://127.0.0.1:7999/auth/users/set_password/"
 
+    let inputErr = false
     return fetch(url, {
         method: 'POST',
         headers: {
@@ -103,10 +117,18 @@ function requestEditUserPassword(newPassword, confirmNewPassword, currentPasswor
             re_new_password: confirmNewPassword,
             current_password: currentPassword
         })
-    }).then(handleFetchError).then(() => {
-        return [true, null]
+    }).then(handleFetchError).then(res => {
+        if (res.status === 400) {
+            inputErr = true
+        }
+        if(res.status === 204) {
+            return {}
+        }
+        return res.json()
+    }).then((data) => {
+        return (inputErr) ? [false, data] : [true, data]
     }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return [false, null]
     })
 }
@@ -115,6 +137,7 @@ function requestEditUserInfo(user, auth_token) {
     // TODO: Don't hardcode location for backend server
     let url = "http://127.0.0.1:7999/auth/users/update_profile/"
 
+    let inputErr = false
     return fetch(url, {
         method: 'POST',
         headers: {
@@ -129,10 +152,15 @@ function requestEditUserInfo(user, auth_token) {
             city: user.city,
             zip_code: user.zip_code,
         })
-    }).then(handleFetchError).then(res => res.json()).then((data) => {
-        return [true, data]
+    }).then(handleFetchError).then(res => {
+        if (res.status === 400) {
+            inputErr = true
+        }
+        return res.json()
+    }).then((data) => {
+        return (inputErr) ? [false, data] : [true, data]
     }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return [false, null]
     })
 }
@@ -150,7 +178,7 @@ function requestGetUserImage(auth_token) {
         const imageObjectURL = URL.createObjectURL(blob);
         return [true, imageObjectURL]
     }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return [false, null]
     })
 }
@@ -172,7 +200,7 @@ function requestEditUserImage(img, imgType, auth_token) {
     }).then(handleFetchError).then(() => {
         return [true, null]
     }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return [false, null]
     })
 }

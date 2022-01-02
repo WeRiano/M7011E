@@ -7,6 +7,7 @@ import json
 import base64
 from rest_framework import status
 import os
+import re
 
 from backend.settings import MEDIA_ROOT
 from authapp.models import User
@@ -30,6 +31,24 @@ def update_profile(request):
     address = data['address']
     city = data['city']
     zip_code = data['zip_code']
+
+    email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    if not re.fullmatch(email_regex, email):
+        response = {
+            "email": "Enter a valid email address."
+        }
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        if int(zip_code) < 10000 or int(zip_code) >= 90000:
+            response = {
+                "email": "Enter a valid email address."
+            }
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError:
+        response = {
+            "zip_code": "A valid integer is required."
+        }
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
     user = request.user
     user.email = email

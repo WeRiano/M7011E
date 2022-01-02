@@ -30,7 +30,7 @@ class Delta:
         self.__hourly_market_price: float = 0
         self.__hourly_consumption: float = 0
 
-        self.__saving = 0.5     # Percentage [0.0 - 1.0]
+        self.__storing = 0.5     # Percentage [0.0 - 1.0]
         self.__using = 0.5      # Percentage [0.0 - 1.0]
 
     # Simulate conditions for one hour.
@@ -72,8 +72,15 @@ class Delta:
         self.__hourly_consumption = random.uniform(1.104, 1.84)
 
     def update_state(self):
-        self.__state.update_state_conditions(self.__hourly_ws_mu, self.__hourly_temp, self.__hourly_market_price,
-                                             self.__hourly_consumption, self.__saving, self.__using)
+        new_storing, new_using = self.__state.update_state_conditions(self.__hourly_ws_mu, self.__hourly_temp,
+                                                                      self.__hourly_market_price,
+                                                                      self.__hourly_consumption,
+                                                                      self.__storing, self.__using)
+        self.__storing = new_storing
+        self.__using = new_using
+        print("Storing: " + str(self.__storing))
+        print("Using: " + str(self.__using))
+        print("Updating every " + str(self.__update_frequency) + " seconds")
 
     def get_conditions(self, filter_slug):
         result = {}
@@ -81,7 +88,7 @@ class Delta:
         if len(filter_list) == 0 or filter_list[0].lower() == 'all':
             result["date_time"] = str(self.__day + 1) + '/' + str(self.__month + 1) + " " + str(self.__hour) + ":00:00"
             result["delta"] = self.__update_frequency
-            result["saving"] = self.__saving
+            result["saving"] = self.__storing
             result["using"] = self.__using
         else:
             for condition in filter_list:
@@ -90,7 +97,7 @@ class Delta:
                 if condition.lower() == "delta":
                     result["delta"] = self.__update_frequency
                 if condition.lower() == "saving":
-                    result["saving"] = self.__saving
+                    result["saving"] = self.__storing
                 if condition.lower() == "using":
                     result["using"] = self.__using
         return result
@@ -104,8 +111,8 @@ class Delta:
     def get_state(self):
         return self.__state
 
-    def set_ratios(self, saving, using):
-        self.__saving = saving
+    def set_ratios(self, storing, using):
+        self.__storing = storing
         self.__using = using
 
     def __update_daily_ws_mu(self):

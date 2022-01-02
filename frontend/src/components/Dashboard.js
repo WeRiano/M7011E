@@ -1,27 +1,50 @@
 import React, {useState, useRef, useEffect} from "react";
-import { Card, Col, Container, Form, Row, ListGroup, Table, ProgressBar, Button } from "react-bootstrap";
+import {Card, Col, Container, Form, Row, ListGroup, Table, ProgressBar, Button, Alert} from "react-bootstrap";
+import { useNavigate } from 'react-router-dom'
 
-import { requestGetSimCond, requestEditDelta } from '../services/api/Simulation'
-import { loadToken} from "../services/Storage";
+import { requestGetSimCond, requestEditDelta, requestEditBufferSettings }
+  from '../services/api/Simulation'
+import { loadToken, storeUser } from "../services/Storage";
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Dashboard() {
+  const newSimDeltaRef = useRef();
+  const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
+
   const [windSpeed, setWindSpeed] = useState(-1) // [m/s]
   const [temp, setTemp] = useState(-1) // [Degrees celsius]
   const [production, setProduction] = useState(-1) // [kWh]
   const [consumption, setConsumption] = useState(0)  // [kWh]
-  const [storing, setStoring] = useState(-1) // [%] (to avoid fpp error)
-  const [using, setUsing] = useState(-1) // [%] (to avoid fpp error)
+  const [storing, setStoring] = useState(50) // [%] (to avoid fpp error)
+  const [using, setUsing] = useState(50) // [%] (to avoid fpp error)
   const [marketPrice, setMarketPrice] = useState(-1)
   const [bufferCapacity, setBufferCapacity] = useState(1) // [kWh] - [0-13.5]
   const [simDateTime, setSimDateTime] = useState('')
-  const [simDelta, setSimDelta] = useState(-1)
+  const [simDelta, setSimDelta] = useState()
   const [bank, setBank] = useState(0)
 
-  const newSimDeltaRef = useRef(simDelta);
+  const { setCurrentUser } = useAuth()
 
-  useEffect(async() => {
-    // TODO: Don't hardcode server endpoints
+  let navigate = useNavigate()
+
+  useEffect(() => {
+    fetchSimConditions()
+    const interval = setInterval(() => {
+      fetchSimConditions()
+    }, 5000);
+    // This will clear the interval when the component unmounts so that we don't call on other pages
+    return () => clearInterval(interval);
+  }, [])
+
+  async function fetchSimConditions() {
     let token = loadToken()
+    if (token == null) {
+      setCurrentUser(null)
+      storeUser(null)
+      navigate('/')
+      return
+    }
     let request = await requestGetSimCond(token)
     const [success, data] = await request
     if (success) {
@@ -34,12 +57,10 @@ export default function Dashboard() {
       setSimDateTime(data["date_time"])
       setConsumption(Math.round(data["consumption"] * 1000) / 1000)
       setBank(Math.round(data["bank"] * 1000) / 1000)
-      newSimDeltaRef.current = simDelta
     } else {
-      // TODO: Visual error for user
+      setError('Error when fetching simulation conditions')
     }
-
-  }, [])
+  }
 
   const net = Math.round((production - consumption) * 10000) / 10000
   const storingDisabled = false; //net < 0;
@@ -47,17 +68,36 @@ export default function Dashboard() {
 
   async function handleUpdateDelta(e) {
     e.preventDefault()
+    let delta = newSimDeltaRef.current.value
     let token = loadToken()
-    let request = requestEditDelta(newSimDeltaRef.current.value, token)
+    let request = requestEditDelta(delta, token)
     const [success, data] = await request
+    if (success) {
+      setInfo('Simulation update frequency was updated successfully')
+      setSimDelta(delta)
+    } else {
+      setError(data["error"])
+    }
+  }
+
+  async function handleUpdateRatios(e) {
+    e.preventDefault()
+    let token = loadToken()
+    let request = requestEditBufferSettings(storing/100, using/100, token)
+    const [success, data] = await request
+    if (!success) {
+      // TODO: Visual error for user
+    }
   }
 
   return (
     <Container>
       <Row className="justify-content-center"
            style={{ marginTop: 50 }}>
-      <Col xs lg="6" className="justify-content-center" style={{ marginTop: 50 }} >
+      <Col xs lg="6" className="justify-content-center" >
         <Card>
+          { error && <Alert variant="danger">{error}</Alert> }
+          { info && <Alert variant="success">{info}</Alert> }
           <Table striped bordered >
             <thead>
               <tr>
@@ -132,9 +172,6 @@ export default function Dashboard() {
             </Form>
           </Card>
         </Col>
-      </Row>
-      <Row className="justify-content-center"
-           style={{ marginTop: 50 }}>
         <Col xs lg="6">
           <Card>
             <Card.Header className="text-center">Power Management</Card.Header>
@@ -165,7 +202,10 @@ export default function Dashboard() {
                   The remaining power will be sold on the market.
                 </Form.Label>
                 <Form.Range min={0} max={100} step={1}
-                            onChange={e => setStoring(e.target.value)}
+                            onChange={(e) => {
+                              setStoring(e.target.value)
+                              handleUpdateRatios(e)
+                            }}
                             variant="secondary"
                             disabled={storingDisabled} />
               </Form>
@@ -183,7 +223,10 @@ export default function Dashboard() {
                   given market price.
                 </Form.Label>
                 <Form.Range min={0} max={100} step={1}
-                            onChange={e => setUsing(e.target.value)}
+                            onChange={(e) => {
+                              setUsing(e.target.value)
+                              handleUpdateRatios(e)}
+                            }
                             variant="secondary"
                             disabled={usingDisabled}/>
               </Form>

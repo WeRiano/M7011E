@@ -58,13 +58,24 @@ export default function Signup() {
       password: passRef.current.value,
       confirm_password: passConfRef.current.value
     }
-    let success = await signup(user)
+    const [success, data] = await signup(user)
     setLoading(false)
 
     if (success) {
       setInfo('New user created successfully')
     } else {
-      setError('Server error when creating user. Try again')
+      if (data["email"] != undefined) {
+        setError("Email: " + data["email"])
+        return
+      }
+      if (data["password"] != undefined) {
+        setError("Password: " + data["password"])
+        return
+      }
+      if (data["zip_code"] != undefined) {
+        setError("Zip Code: " + data["zip_code"])
+        return
+      }
     }
   }
 

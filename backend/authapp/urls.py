@@ -2,7 +2,6 @@ from django.urls import path, include
 from authapp import views
 
 urlpatterns = [
-    #path('users/get_total/', views.get_number_of_users),
     path('users/get_image/', views.get_house_img),
     path('users/get_profile/', views.get_profile),
     path('users/update_image/', views.set_house_img),

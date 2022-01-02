@@ -21,8 +21,7 @@ export function AuthProvider({ children }) {
 
   async function signup(user) {
     let request = requestCreateUser(user)
-    const [success, data] = await request
-    return success
+    return await request
   }
 
   async function login(email, password) {
@@ -30,7 +29,7 @@ export function AuthProvider({ children }) {
     let [success, data] = await request
     if (success) {
       let user = {}
-      storeUser(user, data)
+      storeUser(user, data["auth_token"])
       setCurrentUser(user)
     }
     return success

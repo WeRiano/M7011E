@@ -156,7 +156,8 @@ DJOSER = {
         'user_create': 'authapp.serializers.CustomUserCreateSerializer',
         'user': 'authapp.serializers.CustomUserCreateSerializer',
         'current_user': 'authapp.serializers.CustomUserCreateSerializer',
-    }
+    },
+    'SET_PASSWORD_RETYPE': True
 }
 
 # Internationalization

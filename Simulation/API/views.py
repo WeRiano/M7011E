@@ -23,19 +23,24 @@ def get_conditions(request, conditions):
                summary="Get the current temperature")
 @api_view(['POST'])
 def set_delta(request, delta):
-    Manager.set_delta(delta)
-    return Response(status=status.HTTP_202_ACCEPTED)
+    if delta > 3600 or delta < 5:
+        response = {
+            "error": "Simulation update frequency must be on the interval [5, 3600] seconds"
+        }
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    Manager.set_delta(request.headers['Authorization'], delta)
+    return Response(data={}, status=status.HTTP_202_ACCEPTED)
 
 
 @extend_schema(tags=['weather'],
                description="Returns the current temperature (degrees Celsius) in Luleå, Sweden.",
                summary="Get the current temperature")
 @api_view(['POST'])
-def set_ratios(request, saving, using):
-    if (saving < 0.0 or saving > 1.0) or (using < 0.0 or using > 1.0):
+def set_ratios(request, storing, using):
+    if (storing < 0.0 or storing > 1.0) or (using < 0.0 or using > 1.0):
         response = {
             "error": "Ratios must be on the interval [0.0, 1.0] (0% to 100%)"
         }
-        return Response(data=response, status=status.HTTP_403_FORBIDDEN)
-    Manager.set_ratios(saving, using, request.headers["Authorization"])
-    return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    Manager.set_ratios(storing, using, request.headers["Authorization"])
+    return Response(data={}, status=status.HTTP_202_ACCEPTED)

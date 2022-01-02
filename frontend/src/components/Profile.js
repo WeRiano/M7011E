@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Card, Col, Container, Form, Row} from "react-bootstrap";
+import {Alert, Button, Card, Col, Container, Form, Row} from "react-bootstrap";
 
 import { useAuth } from '../contexts/AuthContext'
 import { loadToken } from '../services/Storage'
@@ -23,6 +23,9 @@ export default function Profile() {
   const [imageUploadFile, setImageUploadFile] = useState(null)
   const [dispImageFile, setDispImageFile] = useState(null)
 
+  const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
+
   const fetchUserImage = async () => {
     console.log("Fetching user image ...")
     let token = loadToken()
@@ -30,9 +33,8 @@ export default function Profile() {
     const [success, data] = await request
     if (success) {
       setDispImageFile(data)
-      console.log("Fetched user image!")
     } else {
-      console.error("Error when downloading profile picture")
+      setError("Error when downloading profile picture")
     }
   }
 
@@ -65,10 +67,20 @@ export default function Profile() {
     let request = requestEditUserInfo(user, token)
     const [success, data] = await request
     if (success) {
-      console.log("Updated user info!")
       window.location.reload(false)
     } else {
-      console.error("Error when updating user info")
+      if (data["email"] != undefined) {
+        setError("Email: " + data["email"])
+        return
+      }
+      if (data["password"] != undefined) {
+        setError("Password: " + data["password"])
+        return
+      }
+      if (data["zip_code"] != undefined) {
+        setError("Zip Code: " + data["zip_code"])
+        return
+      }
     }
   }
 
@@ -80,10 +92,21 @@ export default function Profile() {
                                           curPassRef.current.value, token)
     const [success, data] = await request
     if (success) {
-      console.log("Updated user password!")
+      setInfo("Updated user password!")
       window.location.reload(false)
     } else {
-      console.error("Error when updating user password")
+      if (data["non_field_errors"] != undefined) {
+        setError(data["non_field_errors"])
+        return
+      }
+      if (data["current_password"] != undefined) {
+        setError("Invalid current password.")
+        return
+      }
+      if (data["new_password"] != undefined) {
+        setError(data["new_password"])
+        return
+      }
     }
   }
 
@@ -91,30 +114,27 @@ export default function Profile() {
     e.preventDefault()
 
     if (imageUploadFile == null) {
-      // TODO: Visual error for user
-      console.log("Please select a file")
+      setError("Please select a file.")
       return
     }
     const type_parsed = imageUploadFile.type.split('/')
     if (type_parsed[0] !== 'image') {
-      // TODO: Visual error for user
-      console.error("Non-image files are not accepted")
+      setError("Non-image files are not accepted.")
       return
     }
     let reader = new FileReader()
     reader.onerror = () => {
-      // TODO: Visual error for user
-      console.log("Error when loading file: " + reader.error)
+      setError("Error when loading file: " + reader.error)
     }
     reader.onload = async() => {
       let token = loadToken()
       let request = requestEditUserImage(reader.result, type_parsed[1], token)
       const [success, data] = await request
       if (success) {
-        console.log("Updated profile image successfully")
+        setInfo()
         window.location.reload(false)
       } else {
-        console.error("Error when updating profile image")
+        setError("Error when updating profile image")
       }
     }
     reader.readAsDataURL(imageUploadFile)
@@ -148,6 +168,8 @@ export default function Profile() {
               </Row>
               <Form>
                 <Row className="mb-3" style={{ marginTop: 10}} >
+                  { error && <Alert variant="danger">{error}</Alert> }
+                  { info && <Alert variant="success">{info}</Alert> }
                   <Form.Group as={Col}>
                     <Form.Label>First name</Form.Label>
                     <Form.Control ref={firstNameRef} placeholder={initData.first_name} />
