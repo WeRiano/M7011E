@@ -63,12 +63,16 @@ export default function Dashboard() {
   }
 
   const net = Math.round((production - consumption) * 10000) / 10000
-  const storingDisabled = false; //net < 0;
-  const usingDisabled = false;
 
   async function handleUpdateDelta(e) {
     e.preventDefault()
+    setInfo('')
+    setError('')
     let delta = newSimDeltaRef.current.value
+    if (typeof(delta) != "number") {
+      setError("Simulation update frequency must be an integer.")
+      return
+    }
     let token = loadToken()
     let request = requestEditDelta(delta, token)
     const [success, data] = await request
@@ -82,6 +86,8 @@ export default function Dashboard() {
 
   async function handleUpdateRatios(e) {
     e.preventDefault()
+    setInfo('')
+    setError('')
     let token = loadToken()
     let request = requestEditBufferSettings(storing/100, using/100, token)
     const [success, data] = await request
@@ -201,13 +207,12 @@ export default function Dashboard() {
                   Surefire Electric PowerBuffer™.
                   The remaining power will be sold on the market.
                 </Form.Label>
-                <Form.Range min={0} max={100} step={1}
+                <Form.Range value={storing} min={0} max={100} step={1}
                             onChange={(e) => {
                               setStoring(e.target.value)
                               handleUpdateRatios(e)
                             }}
-                            variant="secondary"
-                            disabled={storingDisabled} />
+                            variant="secondary"/>
               </Form>
               <Card.Text className="text-center">
                 Current storing {storing}%
@@ -222,13 +227,12 @@ export default function Dashboard() {
                   PowerBuffer™. The remaining power will be bought from the market at the
                   given market price.
                 </Form.Label>
-                <Form.Range min={0} max={100} step={1}
+                <Form.Range value={using} min={0} max={100} step={1}
                             onChange={(e) => {
                               setUsing(e.target.value)
                               handleUpdateRatios(e)}
                             }
-                            variant="secondary"
-                            disabled={usingDisabled}/>
+                            variant="secondary"/>
               </Form>
               <Card.Text className="text-center">
                 Current using {using}%

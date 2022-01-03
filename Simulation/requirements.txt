@@ -1,0 +1,4 @@
+Django>=3.2.10
+djangorestframework>=3.13.1
+requests>=2.26.0
+numpy>=1.21.5

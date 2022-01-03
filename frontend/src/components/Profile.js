@@ -53,6 +53,8 @@ export default function Profile() {
 
   async function handleUpdateAccountInfo(e) {
     e.preventDefault()
+    setInfo('')
+    setError('')
     let user = {
       email: (emailRef.current.value === '') ? initData.email : emailRef.current.value,
       first_name: (firstNameRef.current.value === '') ? initData.first_name : firstNameRef.current.value,
@@ -84,6 +86,8 @@ export default function Profile() {
 
   async function handleUpdatePassword(e) {
     e.preventDefault()
+    setInfo('')
+    setError('')
 
     let token = loadToken()
     let request = requestEditUserPassword(newPassRef.current.value, newPassConfRef.current.value,
@@ -110,6 +114,8 @@ export default function Profile() {
 
   async function handleUpdateImage(e) {
     e.preventDefault()
+    setInfo('')
+    setError('')
 
     if (imageUploadFile == null) {
       setError("Please select a file.")

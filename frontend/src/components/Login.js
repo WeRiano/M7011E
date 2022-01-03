@@ -25,6 +25,7 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    setError('')
 
     setLoading(true)
     let success = await login(emailRef.current.value, passwordRef.current.value)

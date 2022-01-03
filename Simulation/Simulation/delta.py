@@ -77,9 +77,9 @@ class Delta:
                                                                       self.__storing, self.__using)
         self.__storing = new_storing
         self.__using = new_using
-        print("Storing: " + str(self.__storing))
-        print("Using: " + str(self.__using))
-        print("Updating every " + str(self.__update_frequency) + " seconds")
+        #print("Storing: " + str(self.__storing))
+        #print("Using: " + str(self.__using))
+        #print("Updating every " + str(self.__update_frequency) + " seconds")
 
     def get_conditions(self, filter_slug):
         result = {}

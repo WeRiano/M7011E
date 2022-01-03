@@ -52,7 +52,7 @@ class State:
         # this varies between 0 all the way to the upper limit of 0.593 (Betz limit)
         # "is defined as the ratio of the power captured by the rotor of the wind turbine, p_r,
         # divided by the total power available in the wind, P
-        # TODO: Improve this??? Coefficient varies dependent on wind speed
+        # TODO: Improve this??? Coefficient varies dependent on wind speed in reality, but how to calc?
         Cp = 0.45
 
         # ρ is the air density in kg/m3 where (https://en.wikipedia.org/wiki/Density_of_air)
@@ -126,7 +126,8 @@ class State:
         return result
 
     def __log(self):
+        pass
         #print("The wind turbine is now generating: " + str(self.__prod_power) + " kWh energy every hour")
         #print("The household is currently consuming: " + str(self.__consumption) + " kWh energy every hour")
-        print("Net production: " + str(self.__prod_power - self.__consumption))
-        print("Buffer size: " + str(self.__buffer))
+        #print("Net production: " + str(self.__prod_power - self.__consumption))
+        #print("Buffer size: " + str(self.__buffer))
