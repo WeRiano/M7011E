@@ -20,8 +20,6 @@ from rest_framework.response import Response
 
 urlpatterns = [ 
     #path('admin/', admin.site.urls),
-    #path('api/', api_overview, name="Simulation API overview"),
     path('api/version/1/', include('API.urls'), name="simulation API version 1.0")
     # TODO: I guess future versions would create another django app and then redirect to that!
-    # Main simulation is in the sim app.
 ]

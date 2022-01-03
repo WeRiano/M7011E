@@ -1,5 +1,4 @@
 import React, {useContext, useState, useEffect} from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import { requestCreateAuthToken, requestDestroyAuthToken, requestCreateUser } from '../services/api/Backend'
 import { loadUser, storeUser, loadToken } from '../services/Storage'
@@ -12,8 +11,6 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(loadUser())
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     storeUser(currentUser)

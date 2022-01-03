@@ -10,15 +10,6 @@ import os
 import re
 
 from backend.settings import MEDIA_ROOT
-from authapp.models import User
-
-
-@api_view(['GET'])
-def get_number_of_users(request):
-    response = {
-        "number_of_users": User.objects.all().count()
-    }
-    return Response(data=response, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

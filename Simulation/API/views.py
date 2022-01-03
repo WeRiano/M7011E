@@ -1,26 +1,20 @@
-import json
 from rest_framework import status
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from drf_spectacular.types import OpenApiTypes
-
-from Simulation.state import State
 from Simulation.manager import Manager
 
 
-@extend_schema(tags=['weather'],
-               description="Returns the current temperature (degrees Celsius) in Luleå, Sweden.",
-               summary="Get the current temperature")
 @api_view(['GET'])
 def get_conditions(request, conditions):
+    if "Authorization" not in request.headers.keys():
+        response = {
+            "error": "Please provide an auth token (Token <auth_token>)."
+        }
+        return Response(data=response, status=status.HTTP_403_FORBIDDEN)
     conditions = Manager.get_conditions(conditions, request.headers['Authorization'])
     return Response(data=conditions, status=status.HTTP_200_OK)
 
 
-@extend_schema(tags=['weather'],
-               description="Returns the current temperature (degrees Celsius) in Luleå, Sweden.",
-               summary="Get the current temperature")
 @api_view(['POST'])
 def set_delta(request, delta):
     if delta > 3600 or delta < 5:
@@ -32,9 +26,6 @@ def set_delta(request, delta):
     return Response(data={}, status=status.HTTP_202_ACCEPTED)
 
 
-@extend_schema(tags=['weather'],
-               description="Returns the current temperature (degrees Celsius) in Luleå, Sweden.",
-               summary="Get the current temperature")
 @api_view(['POST'])
 def set_ratios(request, storing, using):
     if (storing < 0.0 or storing > 1.0) or (using < 0.0 or using > 1.0):

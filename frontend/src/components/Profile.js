@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {Alert, Button, Card, Col, Container, Form, Row} from "react-bootstrap";
 
-import { useAuth } from '../contexts/AuthContext'
 import { loadToken } from '../services/Storage'
 import { requestUserInfo, requestEditUserInfo, requestEditUserPassword, requestEditUserImage, requestGetUserImage }
   from '../services/api/Backend'
@@ -27,7 +26,6 @@ export default function Profile() {
   const [info, setInfo] = useState('')
 
   const fetchUserImage = async () => {
-    console.log("Fetching user image ...")
     let token = loadToken()
     let request = requestGetUserImage(token)
     const [success, data] = await request

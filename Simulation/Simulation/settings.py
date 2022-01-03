@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+
     'corsheaders',
     'rest_framework',
     'drf_spectacular',
@@ -145,16 +146,3 @@ STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
-
-
-REST_FRAMEWORK = {
-    # YOUR SETTINGS
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Wind Turbine Simulation',
-    'DESCRIPTION': 'API that allows a user to fetch the different simulated conditions and information',
-    'VERSION': '1.0.0',
-    'CONTACT': "williamfors13@gmail.com"
-}

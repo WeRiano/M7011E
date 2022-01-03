@@ -1,8 +1,7 @@
-from Simulation.state import State
-from datetime import date
 from numpy import random
-from time import sleep
 import requests
+
+from Simulation.state import State
 
 
 # This class is response for manipulating the state
