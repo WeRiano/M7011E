@@ -1,0 +1,3 @@
+[submodule "M7011E-Simulation"]
+	path = M7011E-Simulation
+	url = https://github.com/WeRiano/M7011E-Simulation
