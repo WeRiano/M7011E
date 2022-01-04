@@ -1,3 +1,9 @@
 [submodule "M7011E-Simulation"]
 	path = M7011E-Simulation
 	url = https://github.com/WeRiano/M7011E-Simulation
+[submodule "M7011E-Frontend"]
+	path = M7011E-Frontend
+	url = https://github.com/WeRiano/M7011E-Frontend
+[submodule "M7011E-Backend"]
+	path = M7011E-Backend
+	url = https://github.com/WeRiano/M7011E-Backend
