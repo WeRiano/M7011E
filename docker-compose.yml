@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: M7011E-Backend
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:7999"
+    ports:
+      - 7999:8000   # LEFT = HOST, RIGHT = CONTAINER
+    volumes:
+      - ./backend/backend
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=1
+      - DB_HOST=db
+      - DB_NAME=m7011e_backend
+      - DB_USER=admin
+      - DB_PASS=${POSTGRES_PASS}
+    depends_on:
+      - db
+
+  simulation:
+    build:
+      context: M7011E-Simulation
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000   # LEFT = HOST, RIGHT = CONTAINER
+    volumes:
+      - ./simulation/simulation
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=1
+    depends_on:
+      - backend
+
+  frontend:
+    build:
+      context: M7011E-Frontend
+    #command:
+
+    ports:
+      - 8001:80   # LEFT = HOST, RIGHT = CONTAINER
+    volumes:
+      - .:/Simulation
+      - /Simulation/node_modules
+    depends_on:
+      - backend
+      - simulation
+    environment:
+      - REACT_APP_AUTH_TOKEN_SECRET_PHRASE=${REACT_APP_AUTH_TOKEN_SECRET_PHRASE}
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_DB=m7011e_backend
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=${POSTGRES_PASS}
