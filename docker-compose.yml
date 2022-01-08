@@ -23,7 +23,7 @@ services:
       - db
     networks:
       m7011e_net:
-        - ipv4_address: ${NET_BACKEND}
+        ipv4_address: ${NET_BACKEND}
 
   simulation:
     build:
@@ -41,26 +41,26 @@ services:
       - backend
     networks:
       m7011e_net:
-        - ipv4_address: ${NET_SIMULATION}
+        ipv4_address: ${NET_SIMULATION}
 
   frontend:
     build:
+      args:
+        REACT_APP_AUTH_TOKEN_SECRET_PHRASE: ${REACT_APP_AUTH_TOKEN_SECRET_PHRASE}
+        REACT_APP_BACKEND_IP: ${NET_BACKEND}
+        REACT_APP_SIMULATION_IP: ${NET_FRONTEND}
       context: M7011E-Frontend
     ports:
-      - 8001:80   # LEFT = HOST, RIGHT = CONTAINER
+      - 80:80   # LEFT = HOST, RIGHT = CONTAINER
     volumes:
       - .:/Simulation
       - /Simulation/node_modules
     depends_on:
       - backend
       - simulation
-    environment:
-      - REACT_APP_AUTH_TOKEN_SECRET_PHRASE=${REACT_APP_AUTH_TOKEN_SECRET_PHRASE}
-      - REACT_APP_BACKEND_IP=${NET_BACKEND}
-      - REACT_APP_SIMULATION_IP{NET_SIMULATION}
     networks:
       m7011e_net:
-        - ipv4_address: ${NET_FRONTEND}
+        ipv4_address: ${NET_FRONTEND}
 
   db:
     image: postgres:13-alpine
@@ -75,4 +75,3 @@ networks:
       driver: default
       config:
         - subnet: ${NET_SUBNET}
-          gateway: ${NET_GATEWAY}
