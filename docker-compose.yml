@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.3'
 
 services:
   backend:
@@ -7,11 +7,9 @@ services:
     command: >
       sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:7999"
+             python manage.py runserver 127.0.0.1:7999"
     ports:
       - 7999:8000   # LEFT = HOST, RIGHT = CONTAINER
-    volumes:
-      - ./backend/backend
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=1
@@ -19,29 +17,35 @@ services:
       - DB_NAME=m7011e_backend
       - DB_USER=admin
       - DB_PASS=${POSTGRES_PASS}
+      - FRONTEND_IP=${NET_FRONTEND}
+      - SIMULATION_IP=${NET_SIMULATION}
     depends_on:
       - db
+    networks:
+      m7011e_net:
+        - ipv4_address: ${NET_BACKEND}
 
   simulation:
     build:
       context: M7011E-Simulation
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py runserver 127.0.0.1:8000"
     ports:
       - 8000:8000   # LEFT = HOST, RIGHT = CONTAINER
-    volumes:
-      - ./simulation/simulation
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=1
+      - BACKEND_IP=${NET_BACKEND}
+      - FRONTEND_IP={NET_FRONTEND}
     depends_on:
       - backend
+    networks:
+      m7011e_net:
+        - ipv4_address: ${NET_SIMULATION}
 
   frontend:
     build:
       context: M7011E-Frontend
-    #command:
-
     ports:
       - 8001:80   # LEFT = HOST, RIGHT = CONTAINER
     volumes:
@@ -52,6 +56,11 @@ services:
       - simulation
     environment:
       - REACT_APP_AUTH_TOKEN_SECRET_PHRASE=${REACT_APP_AUTH_TOKEN_SECRET_PHRASE}
+      - REACT_APP_BACKEND_IP=${NET_BACKEND}
+      - REACT_APP_SIMULATION_IP{NET_SIMULATION}
+    networks:
+      m7011e_net:
+        - ipv4_address: ${NET_FRONTEND}
 
   db:
     image: postgres:13-alpine
@@ -59,3 +68,11 @@ services:
       - POSTGRES_DB=m7011e_backend
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
+
+networks:
+  m7011e_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NET_SUBNET}
+          gateway: ${NET_GATEWAY}
