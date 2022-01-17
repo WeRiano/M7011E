@@ -2,78 +2,68 @@ version: '3.3'
 
 services:
   backend:
-    build:
-      context: M7011E-
     restart: always
+    build:
+      context: M7011E-Backend  
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=1
-      - DB_HOST=db
+      - DB_HOST=backend-db
       - DB_NAME=m7011e_backend
       - DB_USER=admin
       - DB_PASS=${POSTGRES_PASS}
       - FRONTEND_IP=${NET_FRONTEND}
       - SIMULATION_IP=${NET_SIMULATION}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+    volumes:
+      - ./M7011E-Backend/backend/authapp:/app/backend/authapp
+      - ./M7011E-Backend/backend/backend:/app/backend/backend
+      - ./M7011E-Backend/backend/static:/app/backend/static
     depends_on:
-      - db
-    networks:
-      m7011e_net:
-        ipv4_address: ${NET_BACKEND}
-
-  backend-proxy:
-    build:
-      context: M7011E-Backend/proxy
-    restart: always
-    depends_on:
-      - backend
+      - backend-db
     ports:
       - 7999:8000
-    volumes:
-      - static-data:/vol/static
+    networks:
+      - m7011e_net
 
   simulation:
+    restart: always
     build:
       context: M7011E-Simulation
-    restart: always
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=1
       - BACKEND_IP=${NET_BACKEND}
-      - FRONTEND_IP={NET_FRONTEND}
+      - FRONTEND_IP=${NET_FRONTEND}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+    volumes:
+      - ./M7011E-Simulation/Simulation/API:/app/Simulation/API
+      - ./M7011E-Simulation/Simulation/Simulation:/app/Simulation/Simulation
     depends_on:
       - backend
-    networks:
-      m7011e_net:
-        ipv4_address: ${NET_SIMULATION}
-
-  simulation-proxy:
-    build:
-      context: M7011E-Simulation/proxy
-    restart: always
-    depends_on:
-      - simulation
     ports:
       - 8000:8000
-
+    networks:
+      - m7011e_net
+  
   frontend:
+    restart: on-failure
     build:
       args:
         REACT_APP_AUTH_TOKEN_SECRET_PHRASE: ${REACT_APP_AUTH_TOKEN_SECRET_PHRASE}
         REACT_APP_BACKEND_IP: ${NET_BACKEND}
-        REACT_APP_SIMULATION_IP: ${NET_FRONTEND}
+        REACT_APP_SIMULATION_IP: ${NET_SIMULATION}
       context: M7011E-Frontend
     ports:
       - 80:80   # LEFT = HOST, RIGHT = CONTAINER
     depends_on:
       - backend
-      - simulation
     networks:
-      m7011e_net:
-        ipv4_address: ${NET_FRONTEND}
+      - m7011e_net
 
-  db:
+  backend-db:
+    restart: on-failure
     image: postgres:13-alpine
-    restart: always
     environment:
       - POSTGRES_DB=m7011e_backend
       - POSTGRES_USER=admin
@@ -81,7 +71,7 @@ services:
     networks:
       - m7011e_net
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - ./M7011E-Backend/postgres-data:/var/lib/postgresql/data
 
 networks:
   m7011e_net:
