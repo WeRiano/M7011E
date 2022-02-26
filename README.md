@@ -53,6 +53,7 @@ and simulation service is accessing the other services.
 See the .env.sample file in this directory for an example. You can change the values
 in the file and then rename it.
 
+
 ## Running
 
 Navigate to the main project directory and run
@@ -70,6 +71,19 @@ docker-compose down
 ```
 
 where you can add the optional `-v` flag to reset the user database.
+
+## Creating backend admin user
+
+Run the following commands
+
+```
+docker exec -it m7011e_backend_1 /bin/sh
+python manage.py createsupoeruser
+```
+
+The console will now prompt you to enter all the necessary account information. Do so. Once you are done
+and the superuser is created, type ``exit``.
+
 
 # Hosting individual services
 
